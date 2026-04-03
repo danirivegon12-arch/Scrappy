@@ -66,8 +66,18 @@
             </div>
 
             <div class="bg-slate-800 rounded-3xl p-5 shadow-lg flex-shrink-0 mt-2 mb-6">
+                <h3 class="font-black text-slate-400 text-[10px] uppercase tracking-widest border-b border-slate-600 pb-3 mb-4">Datos de Entrega</h3>
+                
                 <div class="space-y-3 mb-4">
-                    <input type="text" id="cust-name" placeholder="Nombre del cliente *" class="w-full p-4 bg-slate-700 text-white placeholder-slate-400 border border-slate-600 rounded-2xl focus:ring-2 focus:ring-orange-500 outline-none font-bold">
+                    <!-- ENVOLTURA RELATIVA PARA EL AUTOCOMPLETADO -->
+                    <div class="relative">
+                        <input type="text" id="cust-name" oninput="handleNameInput(this.value)" autocomplete="off" placeholder="Nombre del cliente *" class="w-full p-4 bg-slate-700 text-white placeholder-slate-400 border border-slate-600 rounded-2xl focus:ring-2 focus:ring-orange-500 outline-none font-bold">
+                        <!-- LISTA DESPLEGABLE DE AUTOCOMPLETADO -->
+                        <div id="autocomplete-list" class="absolute z-50 w-full bg-white rounded-xl shadow-2xl border border-slate-200 mt-1 hidden max-h-48 overflow-y-auto">
+                            <!-- Inyectado por JS -->
+                        </div>
+                    </div>
+
                     <input type="text" id="cust-addr" placeholder="Dirección o 'Local' *" class="w-full p-4 bg-slate-700 text-white placeholder-slate-400 border border-slate-600 rounded-2xl focus:ring-2 focus:ring-orange-500 outline-none font-bold">
                     <input type="tel" id="cust-phone" placeholder="Celular (Opcional)" class="w-full p-4 bg-slate-700 text-white placeholder-slate-400 border border-slate-600 rounded-2xl focus:ring-2 focus:ring-orange-500 outline-none font-bold">
                 </div>
@@ -202,7 +212,7 @@
         // ==========================================
         // 1. CONFIGURACIÓN Y DATOS DE MENÚ
         // ==========================================
-        const ADMIN_PASS = "58654"; // CONTRASEÑA NUMÉRICA ESTABLECIDA
+        const ADMIN_PASS = "58654";
 
         const menu = [
             { cat: "Hamb. Res", icon: "🍔", items: [ { id: 'r1', n: "Scrappy Clasica", p: 60, v: 'burger', e: true }, { id: 'r2', n: "Tocino Crunch", p: 70, v: 'burger', e: true }, { id: 'r3', n: "Double Cheese Chipotle", p: 75, v: 'burger', e: true }, { id: 'r4', n: "Big Scrappy", p: 80, v: 'burger', e: true } ] },
@@ -225,11 +235,13 @@
         let cart = []; let curItem = null; let editId = null; let idToDelete = null;
         let localOrders = JSON.parse(localStorage.getItem('scrappy_db')) || [];
         let localExpenses = JSON.parse(localStorage.getItem('scrappy_exp')) || []; 
+        let localCustomers = JSON.parse(localStorage.getItem('scrappy_cust')) || []; // Cartera de Clientes
+        
         let ghUser = localStorage.getItem('gh_user') || ''; let ghRepo = localStorage.getItem('gh_repo') || ''; let ghToken = localStorage.getItem('gh_token') || '';
         let ghSha = null; let isSyncing = false;
 
         // ==========================================
-        // 3. UI PRINCIPAL Y WHATSAPP
+        // 3. UI PRINCIPAL
         // ==========================================
         function initUI() {
             const catGrid = document.getElementById('pos-categories');
@@ -247,6 +259,39 @@
             document.getElementById('pos-items').classList.replace('hidden', 'flex');
         };
 
+        // --- CERRAR AUTOCOMPLETADO SI CLICKEA FUERA ---
+        document.addEventListener('click', function(e) {
+            if(e.target.id !== 'cust-name') {
+                document.getElementById('autocomplete-list').classList.add('hidden');
+            }
+        });
+
+        // --- FUNCIÓN AUTOCOMPLETADO MÁGICO ---
+        window.handleNameInput = (val) => {
+            const list = document.getElementById('autocomplete-list');
+            if (!val.trim()) { list.classList.add('hidden'); return; }
+            
+            const q = val.toLowerCase();
+            const matches = localCustomers.filter(c => c.name.toLowerCase().includes(q));
+            
+            if (matches.length === 0) { list.classList.add('hidden'); return; }
+
+            list.innerHTML = matches.map(c => `
+                <div onclick="selectCustomer('${c.phone || ''}', '${c.name.replace(/'/g, "\\'")}', '${c.address.replace(/'/g, "\\'")}')" class="p-4 border-b border-slate-100 active:bg-orange-50 cursor-pointer transition-colors last:border-0 hover:bg-slate-50">
+                    <div class="font-black text-slate-800 uppercase italic">${c.name}</div>
+                    <div class="text-[10px] font-bold text-slate-400 mt-1 truncate"><i class="fa-solid fa-location-dot mr-1 text-slate-300"></i>${c.address} ${c.phone ? `&nbsp;•&nbsp; <i class="fa-solid fa-phone mx-1 text-orange-400"></i>${c.phone}` : ''}</div>
+                </div>
+            `).join('');
+            list.classList.remove('hidden');
+        };
+
+        window.selectCustomer = (phone, name, address) => {
+            document.getElementById('cust-name').value = name;
+            document.getElementById('cust-addr').value = address;
+            document.getElementById('cust-phone').value = phone;
+            document.getElementById('autocomplete-list').classList.add('hidden');
+        };
+
         window.sendTicketWS = (id) => {
             const o = localOrders.find(x => x.id === id); if(!o || !o.phone) return alert("No hay número registrado.");
             let msg = `Hola *${o.customer}*, recibimos tu pedido en *Scrappy* 🍔🍟\n\n*Resumen de tu pedido:*\n`;
@@ -255,12 +300,7 @@
                 if(i.meat) msg += `   🥩 ${i.meat === 'Mixto' ? 'Mixto ('+i.mixed.join('+')+')' : i.meat}\n`;
                 if(i.sweetOpts && i.sweetOpts.length) msg += `   🍓 ${i.sweetOpts.join(', ')}\n`;
                 if(i.selSauces && i.selSauces.length) msg += `   🌶️ Salsas: ${i.selSauces.join(', ')}\n`;
-                // Lógica de WhatsApp para CON TODO
-                if(i.removed && i.removed.length) {
-                    msg += `   ❌ Sin: ${i.removed.join(', ')}\n`;
-                } else if (i.v) {
-                    msg += `   ✅ CON TODO\n`;
-                }
+                if(i.removed && i.removed.length) { msg += `   ❌ Sin: ${i.removed.join(', ')}\n`; } else if (i.v) { msg += `   ✅ CON TODO\n`; }
                 if(i.extras && i.extras.length) msg += `   ➕ Con: ${i.extras.map(x=>x.n).join(', ')}\n`;
                 if(i.gen) msg += `   ➕ Extras ($10): x${i.gen}\n`;
                 if(i.notes) msg += `   📝 Nota: ${i.notes}\n`;
@@ -323,14 +363,7 @@
                 if(it.meat) dets.push(`<span class="text-orange-700">🥩 ${it.meat === 'Mixto' ? 'Mixto ('+it.mixed.join('+')+')' : it.meat}</span>`);
                 if(it.sweetOpts && it.sweetOpts.length) dets.push(`<span class="text-pink-600 font-bold">🍓 ${it.sweetOpts.join(', ')}</span>`);
                 if(it.selSauces && it.selSauces.length) dets.push(`<span class="text-orange-600 font-bold">🌶️ Salsas: ${it.selSauces.join(', ')}</span>`);
-                
-                // Lógica de CON TODO en carrito
-                if(it.removed && it.removed.length) {
-                    dets.push(`<span class="text-red-500">❌ Sin: ${it.removed.join(', ')}</span>`);
-                } else if(it.v) {
-                    dets.push(`<span class="text-emerald-600 font-black">✅ CON TODO</span>`);
-                }
-                
+                if(it.removed && it.removed.length) { dets.push(`<span class="text-red-500">❌ Sin: ${it.removed.join(', ')}</span>`); } else if(it.v) { dets.push(`<span class="text-emerald-600 font-black">✅ CON TODO</span>`); }
                 if(it.extras && it.extras.length) dets.push(`<span class="text-green-600">➕ ${it.extras.map(x=>x.n).join(', ')}</span>`);
                 if(it.gen) dets.push(`<span class="text-purple-600">➕ Extra $10 x${it.gen}</span>`);
                 if(it.notes) dets.push(`<span class="text-blue-500">Nota: ${it.notes}</span>`);
@@ -353,6 +386,19 @@
                 if(idx > -1) { orderObj.id = editId; orderObj.created = localOrders[idx].created; orderObj.timeStr = localOrders[idx].timeStr; orderObj.status = localOrders[idx].status; localOrders[idx] = orderObj; }
             } else {
                 orderObj.id = 'ord_' + now + '_' + Math.floor(Math.random()*1000); orderObj.created = now; orderObj.timeStr = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); orderObj.status = 'p'; localOrders.push(orderObj);
+            }
+
+            // AUTO-GUARDAR EN CARTERA DE CLIENTES
+            if (n && a) {
+                let existingIdx = -1;
+                if (t) existingIdx = localCustomers.findIndex(c => c.phone === t);
+                else existingIdx = localCustomers.findIndex(c => c.name.toLowerCase() === n.toLowerCase());
+
+                if (existingIdx > -1) {
+                    localCustomers[existingIdx].name = n; localCustomers[existingIdx].address = a; localCustomers[existingIdx].phone = t; localCustomers[existingIdx].updatedAt = now;
+                } else {
+                    localCustomers.push({ id: 'cust_' + now, name: n, address: a, phone: t, updatedAt: now });
+                }
             }
 
             saveDataLocal(); cart = []; renderCart(); document.getElementById('cust-name').value = ""; document.getElementById('cust-addr').value = ""; document.getElementById('cust-phone').value = ""; editId = null; document.getElementById('save-text').innerText = "Enviar a Cocina"; updateViews(); switchTab('kitchen'); syncWithGitHub(); 
@@ -386,10 +432,9 @@
 
         function saveDataLocal() { 
             const limite = 35 * 24 * 60 * 60 * 1000;
-            localOrders = localOrders.filter(o => (Date.now() - o.updatedAt < limite)); 
-            localStorage.setItem('scrappy_db', JSON.stringify(localOrders)); 
-            localExpenses = localExpenses.filter(e => (Date.now() - e.updatedAt < limite));
-            localStorage.setItem('scrappy_exp', JSON.stringify(localExpenses));
+            localOrders = localOrders.filter(o => (Date.now() - o.updatedAt < limite)); localStorage.setItem('scrappy_db', JSON.stringify(localOrders)); 
+            localExpenses = localExpenses.filter(e => (Date.now() - e.updatedAt < limite)); localStorage.setItem('scrappy_exp', JSON.stringify(localExpenses));
+            localStorage.setItem('scrappy_cust', JSON.stringify(localCustomers)); 
         }
 
         // ==========================================
@@ -409,14 +454,14 @@
                 const url = `https://api.github.com/repos/${ghUser}/${ghRepo}/contents/scrappy_db.json`;
                 const headers = { "Authorization": `token ${ghToken}`, "Accept": "application/vnd.github.v3+json" };
                 let res = await fetch(url + '?t=' + Date.now(), { headers }); 
-                let cloudData = { orders: [], expenses: [] }; 
+                let cloudData = { orders: [], expenses: [], customers: [] }; 
                 let needUpload = false;
 
                 if (res.ok) { 
                     const fileData = await res.json(); ghSha = fileData.sha; 
                     const decoded = b64DecodeUnicode(fileData.content.replace(/\n/g, '')); 
                     const parsed = JSON.parse(decoded); 
-                    if(Array.isArray(parsed)) { cloudData.orders = parsed; needUpload = true; } else { cloudData = parsed; }
+                    if(Array.isArray(parsed)) { cloudData.orders = parsed; needUpload = true; } else { cloudData = parsed; cloudData.customers = parsed.customers || []; }
                 } else if (res.status === 404) { needUpload = true; } else { throw new Error("Token Inválido"); }
 
                 let mergedOrd = new Map(); cloudData.orders.forEach(o => mergedOrd.set(o.id, o));
@@ -427,11 +472,15 @@
                 localExpenses.forEach(loc => { if (mergedExp.has(loc.id)) { let cld = mergedExp.get(loc.id); if (loc.updatedAt > cld.updatedAt) { mergedExp.set(loc.id, loc); needUpload = true; } } else { mergedExp.set(loc.id, loc); needUpload = true; } });
                 localExpenses = Array.from(mergedExp.values()); 
 
+                let mergedCust = new Map(); cloudData.customers.forEach(c => mergedCust.set(c.id, c));
+                localCustomers.forEach(loc => { if (mergedCust.has(loc.id)) { let cld = mergedCust.get(loc.id); if (loc.updatedAt > cld.updatedAt) { mergedCust.set(loc.id, loc); needUpload = true; } } else { mergedCust.set(loc.id, loc); needUpload = true; } });
+                localCustomers = Array.from(mergedCust.values()); 
+
                 saveDataLocal(); updateViews();
 
                 if (needUpload) {
                     uiStatus.innerHTML = `<i class="fa-solid fa-cloud-arrow-up mr-1"></i> Subiendo...`; uiStatus.classList.replace('bg-green-600', 'bg-orange-600');
-                    const content = b64EncodeUnicode(JSON.stringify({ orders: localOrders, expenses: localExpenses })); 
+                    const content = b64EncodeUnicode(JSON.stringify({ orders: localOrders, expenses: localExpenses, customers: localCustomers })); 
                     const body = { message: "SmartSync Update", content: content }; if (ghSha) body.sha = ghSha;
                     const putRes = await fetch(url, { method: 'PUT', headers, body: JSON.stringify(body) }); if (putRes.ok) { const putData = await putRes.json(); ghSha = putData.content.sha; }
                 }
@@ -487,7 +536,6 @@
 
         function renderControl() {
             const fin = calculateFinances();
-            
             const recentExp = localExpenses.filter(e => e.status !== 'd' && e.date >= new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()).getTime());
             const expListHTML = recentExp.map(e => `<div class="flex justify-between items-center text-[10px] text-slate-500 border-t border-slate-100 pt-2 mt-2"><div class="flex flex-col"><span class="font-bold text-slate-700">${e.desc}</span><span class="text-[9px] text-slate-400"><i class="fa-regular fa-clock"></i> ${e.timeStr || ''}</span></div><span class="text-red-500 font-black text-sm">-$${e.amount}</span></div>`).join('');
 
@@ -500,65 +548,31 @@
             const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
             const histOrders = localOrders.filter(x => (x.status === 'f' || x.status === 'c') && x.created >= sevenDaysAgo).map(o => ({ type: 'o', ts: o.created, ...o }));
             const histExp = localExpenses.filter(x => x.status !== 'd' && x.date >= sevenDaysAgo).map(e => ({ type: 'e', ts: e.date, ...e }));
-            
             const combinedHist = [...histOrders, ...histExp].sort((a,b) => b.ts - a.ts);
             
             document.getElementById('control-history').innerHTML = !combinedHist.length ? `<div class="text-center text-slate-300 py-10 font-black uppercase tracking-widest">Sin historial reciente</div>` : combinedHist.map(item => {
                 if(item.type === 'o') {
-                    return `
-                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 relative mb-3">
-                        <div class="flex justify-between items-start mb-2">
-                            <div><h4 class="font-black text-slate-800 uppercase italic">${item.customer}</h4><span class="text-[10px] font-bold text-slate-400">${new Date(item.created).toLocaleDateString()} ${item.timeStr}</span></div>
-                            <span class="font-black text-lg ${item.status === 'c' ? 'text-red-500 line-through' : 'text-green-600'}">$${item.total}</span>
-                        </div>
-                        <div class="flex justify-between items-center mt-3 pt-3 border-t border-slate-100">
-                            <span class="text-[10px] font-black uppercase px-2 py-1 rounded ${item.status === 'c' ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}">${item.status === 'c' ? 'Cancelado' : 'Entregado'}</span>
-                            <button onclick="askDel('${item.id}')" class="text-slate-400 active:text-red-500 transition-colors p-2"><i class="fa-solid fa-trash"></i></button>
-                        </div>
-                    </div>`;
+                    return `<div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 relative mb-3"><div class="flex justify-between items-start mb-2"><div><h4 class="font-black text-slate-800 uppercase italic">${item.customer}</h4><span class="text-[10px] font-bold text-slate-400">${new Date(item.created).toLocaleDateString()} ${item.timeStr}</span></div><span class="font-black text-lg ${item.status === 'c' ? 'text-red-500 line-through' : 'text-green-600'}">$${item.total}</span></div><div class="flex justify-between items-center mt-3 pt-3 border-t border-slate-100"><span class="text-[10px] font-black uppercase px-2 py-1 rounded ${item.status === 'c' ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}">${item.status === 'c' ? 'Cancelado' : 'Entregado'}</span><button onclick="askDel('${item.id}')" class="text-slate-400 active:text-red-500 transition-colors p-2"><i class="fa-solid fa-trash"></i></button></div></div>`;
                 } else {
-                    return `
-                    <div class="bg-slate-50 p-4 rounded-2xl shadow-sm border border-slate-200 relative mb-3">
-                        <div class="flex justify-between items-start mb-2">
-                            <div><h4 class="font-black text-slate-600 uppercase italic"><i class="fa-solid fa-money-bill-wave text-red-400 mr-1"></i> ${item.desc}</h4><span class="text-[10px] font-bold text-slate-400">${new Date(item.date).toLocaleDateString()} ${item.timeStr}</span></div>
-                            <span class="font-black text-lg text-red-500">-$${item.amount}</span>
-                        </div>
-                        <div class="flex justify-between items-center mt-3 pt-3 border-t border-slate-200">
-                            <span class="text-[10px] font-black uppercase px-2 py-1 rounded bg-slate-200 text-slate-500">Gasto Registrado</span>
-                            <button onclick="askDel('${item.id}')" class="text-slate-400 active:text-red-500 transition-colors p-2"><i class="fa-solid fa-trash"></i></button>
-                        </div>
-                    </div>`;
+                    return `<div class="bg-slate-50 p-4 rounded-2xl shadow-sm border border-slate-200 relative mb-3"><div class="flex justify-between items-start mb-2"><div><h4 class="font-black text-slate-600 uppercase italic"><i class="fa-solid fa-money-bill-wave text-red-400 mr-1"></i> ${item.desc}</h4><span class="text-[10px] font-bold text-slate-400">${new Date(item.date).toLocaleDateString()} ${item.timeStr}</span></div><span class="font-black text-lg text-red-500">-$${item.amount}</span></div><div class="flex justify-between items-center mt-3 pt-3 border-t border-slate-200"><span class="text-[10px] font-black uppercase px-2 py-1 rounded bg-slate-200 text-slate-500">Gasto Registrado</span><button onclick="askDel('${item.id}')" class="text-slate-400 active:text-red-500 transition-colors p-2"><i class="fa-solid fa-trash"></i></button></div></div>`;
                 }
             }).join('');
         }
 
         window.generatePDF = () => {
             const { jsPDF } = window.jspdf; const doc = new jsPDF(); const fin = calculateFinances();
-            doc.setFont("helvetica", "bold"); doc.setFontSize(22); doc.setTextColor(234, 88, 12); 
-            doc.text("SCRAPPY - BALANCE FINANCIERO", 14, 22);
-            doc.setFontSize(10); doc.setFont("helvetica", "normal"); doc.setTextColor(100, 100, 100);
-            doc.text("Generado el: " + new Date().toLocaleString(), 14, 30);
-
+            doc.setFont("helvetica", "bold"); doc.setFontSize(22); doc.setTextColor(234, 88, 12); doc.text("SCRAPPY - BALANCE FINANCIERO", 14, 22);
+            doc.setFontSize(10); doc.setFont("helvetica", "normal"); doc.setTextColor(100, 100, 100); doc.text("Generado el: " + new Date().toLocaleString(), 14, 30);
             doc.setFontSize(14); doc.setFont("helvetica", "bold"); doc.setTextColor(40, 40, 40); doc.text("Resumen de Hoy", 14, 45);
-            doc.setFontSize(12); doc.setFont("helvetica", "normal"); doc.text(`Ventas Totales: $${fin.s.d}`, 14, 52); doc.text(`Gastos Totales: $${fin.e.d}`, 14, 59);
-            doc.setFont("helvetica", "bold"); doc.text(`Ganancia Neta: $${fin.s.d - fin.e.d}`, 14, 66);
-
+            doc.setFontSize(12); doc.setFont("helvetica", "normal"); doc.text(`Ventas Totales: $${fin.s.d}`, 14, 52); doc.text(`Gastos Totales: $${fin.e.d}`, 14, 59); doc.setFont("helvetica", "bold"); doc.text(`Ganancia Neta: $${fin.s.d - fin.e.d}`, 14, 66);
             doc.setFontSize(14); doc.setFont("helvetica", "bold"); doc.text("Resumen Semanal", 14, 80);
-            doc.setFontSize(12); doc.setFont("helvetica", "normal"); doc.text(`Ventas Totales: $${fin.s.w}`, 14, 87); doc.text(`Gastos Totales: $${fin.e.w}`, 14, 94);
-            doc.setFont("helvetica", "bold"); doc.text(`Ganancia Neta: $${fin.s.w - fin.e.w}`, 14, 101);
-
+            doc.setFontSize(12); doc.setFont("helvetica", "normal"); doc.text(`Ventas Totales: $${fin.s.w}`, 14, 87); doc.text(`Gastos Totales: $${fin.e.w}`, 14, 94); doc.setFont("helvetica", "bold"); doc.text(`Ganancia Neta: $${fin.s.w - fin.e.w}`, 14, 101);
             doc.setFontSize(14); doc.setFont("helvetica", "bold"); doc.text("Resumen Mensual", 14, 115);
-            doc.setFontSize(12); doc.setFont("helvetica", "normal"); doc.text(`Ventas Totales: $${fin.s.m}`, 14, 122); doc.text(`Gastos Totales: $${fin.e.m}`, 14, 129);
-            doc.setFont("helvetica", "bold"); doc.text(`Ganancia Neta: $${fin.s.m - fin.e.m}`, 14, 136);
-
+            doc.setFontSize(12); doc.setFont("helvetica", "normal"); doc.text(`Ventas Totales: $${fin.s.m}`, 14, 122); doc.text(`Gastos Totales: $${fin.e.m}`, 14, 129); doc.setFont("helvetica", "bold"); doc.text(`Ganancia Neta: $${fin.s.m - fin.e.m}`, 14, 136);
             doc.setFontSize(14); doc.text("Desglose de Gastos de la Semana", 14, 155);
             const startOfWeek = getStartOfCustomWeek(new Date());
             const weeklyExpenses = localExpenses.filter(e => e.status !== 'd' && e.date >= startOfWeek).map(e => [ new Date(e.date).toLocaleDateString() + ' ' + (e.timeStr || ''), e.desc, `$${e.amount}` ]);
-
-            if(weeklyExpenses.length > 0) {
-                doc.autoTable({ startY: 160, head: [['Fecha y Hora', 'Descripción del Gasto', 'Monto']], body: weeklyExpenses, theme: 'striped', headStyles: { fillColor: [234, 88, 12] } });
-            } else { doc.setFontSize(10); doc.setFont("helvetica", "italic"); doc.text("No se registraron gastos esta semana.", 14, 162); }
-
+            if(weeklyExpenses.length > 0) { doc.autoTable({ startY: 160, head: [['Fecha y Hora', 'Descripción del Gasto', 'Monto']], body: weeklyExpenses, theme: 'striped', headStyles: { fillColor: [234, 88, 12] } }); } else { doc.setFontSize(10); doc.setFont("helvetica", "italic"); doc.text("No se registraron gastos esta semana.", 14, 162); }
             doc.save(`Scrappy_Balance_${new Date().toLocaleDateString().replace(/\//g, '-')}.pdf`);
         };
 
@@ -573,14 +587,8 @@
 
             document.getElementById('kitchen-list').innerHTML = !p.length ? `<div class="text-center text-slate-300 py-20 font-black uppercase tracking-widest">Cocina Limpia</div>` : p.map(o => `
                 <div class="bg-white border-l-8 border-red-500 rounded-3xl p-5 shadow-lg relative">
-                    <div class="absolute top-4 right-4 flex gap-2">
-                        <button onclick="cancelOrd('${o.id}')" class="bg-red-50 text-red-500 px-3 py-1.5 rounded-full font-black text-[10px] uppercase shadow-sm border border-red-100"><i class="fa-solid fa-ban"></i></button>
-                        <button onclick="editOrd('${o.id}')" class="bg-slate-100 text-slate-500 px-3 py-1.5 rounded-full font-black text-[10px] uppercase shadow-sm">Editar</button>
-                    </div>
-                    <div class="mb-4 pr-32 border-b border-slate-100 pb-3">
-                        <h3 class="font-black text-2xl italic uppercase tracking-tighter text-slate-800">${o.customer}</h3>
-                        <div class="flex items-center gap-2 mt-1"><span class="bg-slate-100 px-2 py-0.5 rounded text-[10px] font-black uppercase text-slate-400">${o.timeStr}</span><span class="clock bg-red-100 text-red-600 px-2 py-0.5 rounded text-[10px] font-black tracking-widest" data-start="${o.created}">⏱️ 00:00</span></div>
-                    </div>
+                    <div class="absolute top-4 right-4 flex gap-2"><button onclick="cancelOrd('${o.id}')" class="bg-red-50 text-red-500 px-3 py-1.5 rounded-full font-black text-[10px] uppercase shadow-sm border border-red-100"><i class="fa-solid fa-ban"></i></button><button onclick="editOrd('${o.id}')" class="bg-slate-100 text-slate-500 px-3 py-1.5 rounded-full font-black text-[10px] uppercase shadow-sm">Editar</button></div>
+                    <div class="mb-4 pr-32 border-b border-slate-100 pb-3"><h3 class="font-black text-2xl italic uppercase tracking-tighter text-slate-800">${o.customer}</h3><div class="flex items-center gap-2 mt-1"><span class="bg-slate-100 px-2 py-0.5 rounded text-[10px] font-black uppercase text-slate-400">${o.timeStr}</span><span class="clock bg-red-100 text-red-600 px-2 py-0.5 rounded text-[10px] font-black tracking-widest" data-start="${o.created}">⏱️ 00:00</span></div></div>
                     <div class="space-y-3 mb-6">
                         ${o.cart.map(i => `<div class="bg-slate-50 p-3 rounded-2xl border border-slate-100"><div class="font-black text-lg text-slate-800 leading-none">${i.qty}x ${i.n}</div>
                             <div class="text-[10px] font-bold text-slate-500 uppercase mt-2 italic space-y-1">
@@ -598,15 +606,8 @@
 
             document.getElementById('delivery-list').innerHTML = !r.length ? `<div class="text-center text-slate-300 py-20 font-black uppercase tracking-widest">Nada p' Repartir</div>` : r.map(o => `
                 <div class="bg-white border-l-8 border-orange-500 rounded-3xl p-5 shadow-lg relative">
-                    <div class="absolute top-4 right-4 flex gap-2">
-                        <button onclick="cancelOrd('${o.id}')" class="bg-red-50 text-red-500 px-3 py-1.5 rounded-full font-black text-[10px] uppercase shadow-sm border border-red-100"><i class="fa-solid fa-ban"></i></button>
-                        ${o.phone ? `<button onclick="sendTicketWS('${o.id}')" class="bg-green-100 text-green-600 px-3 py-1.5 rounded-full font-black text-[10px] uppercase shadow-sm"><i class="fa-brands fa-whatsapp text-sm"></i></button>` : ''}
-                        <button onclick="editOrd('${o.id}')" class="bg-slate-100 text-slate-500 px-3 py-1.5 rounded-full font-black text-[10px] uppercase shadow-sm">Editar</button>
-                    </div>
-                    <div class="flex justify-between items-start mb-4 pr-32 border-b border-slate-100 pb-3">
-                        <div><h3 class="font-black text-2xl italic uppercase tracking-tighter text-slate-800">${o.customer}</h3><span class="clock bg-orange-100 text-orange-700 px-2 py-0.5 rounded text-[10px] font-black tracking-widest inline-block mt-1" data-start="${o.created}">⏱️ 00:00</span></div>
-                        <span class="bg-slate-800 text-white font-black text-2xl px-4 py-2 rounded-2xl italic shadow-md">$${o.total}</span>
-                    </div>
+                    <div class="absolute top-4 right-4 flex gap-2"><button onclick="cancelOrd('${o.id}')" class="bg-red-50 text-red-500 px-3 py-1.5 rounded-full font-black text-[10px] uppercase shadow-sm border border-red-100"><i class="fa-solid fa-ban"></i></button>${o.phone ? `<button onclick="sendTicketWS('${o.id}')" class="bg-green-100 text-green-600 px-3 py-1.5 rounded-full font-black text-[10px] uppercase shadow-sm"><i class="fa-brands fa-whatsapp text-sm"></i></button>` : ''}<button onclick="editOrd('${o.id}')" class="bg-slate-100 text-slate-500 px-3 py-1.5 rounded-full font-black text-[10px] uppercase shadow-sm">Editar</button></div>
+                    <div class="flex justify-between items-start mb-4 pr-32 border-b border-slate-100 pb-3"><div><h3 class="font-black text-2xl italic uppercase tracking-tighter text-slate-800">${o.customer}</h3><span class="clock bg-orange-100 text-orange-700 px-2 py-0.5 rounded text-[10px] font-black tracking-widest inline-block mt-1" data-start="${o.created}">⏱️ 00:00</span></div><span class="bg-slate-800 text-white font-black text-2xl px-4 py-2 rounded-2xl italic shadow-md">$${o.total}</span></div>
                     <div class="bg-slate-50 p-4 rounded-2xl mb-4 font-black uppercase italic border border-slate-200"><p class="text-[9px] text-slate-400 mb-1 tracking-widest font-bold">📍 Dirección</p><p class="text-xl leading-tight text-slate-700">${o.address}</p></div>
                     
                     <button onclick="document.getElementById('det-${o.id}').classList.toggle('hidden')" class="w-full bg-white text-slate-500 font-black py-3 rounded-2xl text-[10px] uppercase tracking-widest mb-4 active:scale-95 transition-transform flex justify-center items-center gap-2 border-2 border-slate-100 shadow-sm"><i class="fa-solid fa-list"></i> Ver / Ocultar Pedido</button>
@@ -615,25 +616,14 @@
                     </div>
 
                     ${o.phone ? `<div class="grid grid-cols-2 gap-3 mb-4"><a href="tel:${o.phone}" class="bg-blue-50 text-blue-600 font-black py-4 rounded-2xl flex flex-col items-center shadow-sm active:scale-95 border border-blue-100"><i class="fa-solid fa-phone text-xl mb-1"></i><span class="text-[9px] uppercase tracking-widest">Llamar</span></a><a href="https://wa.me/52${o.phone.replace(/\D/g,'')}" target="_blank" class="bg-green-50 text-green-600 font-black py-4 rounded-2xl flex flex-col items-center shadow-sm active:scale-95 border border-green-100"><i class="fa-brands fa-whatsapp text-xl mb-1"></i><span class="text-[9px] uppercase tracking-widest">WhatsApp</span></a></div>` : ''}
-                    <div class="flex gap-3">
-                        <button onclick="window.open('https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.address)}')" class="flex-1 bg-slate-100 text-slate-600 font-black py-5 rounded-2xl text-[10px] uppercase tracking-widest active:scale-95 transition-transform"><i class="fa-solid fa-map-location-dot text-xl mb-1 block"></i> Mapa</button>
-                        <button onclick="upStatus('${o.id}', 'f')" class="flex-[2] bg-orange-600 text-white font-black py-5 rounded-2xl shadow-xl uppercase italic tracking-widest active:scale-95 transition-transform"><i class="fa-solid fa-check text-xl mb-1 block"></i> Entregado</button>
-                    </div>
+                    <div class="flex gap-3"><button onclick="window.open('https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.address)}')" class="flex-1 bg-slate-100 text-slate-600 font-black py-5 rounded-2xl text-[10px] uppercase tracking-widest active:scale-95 transition-transform"><i class="fa-solid fa-map-location-dot text-xl mb-1 block"></i> Mapa</button><button onclick="upStatus('${o.id}', 'f')" class="flex-[2] bg-orange-600 text-white font-black py-5 rounded-2xl shadow-xl uppercase italic tracking-widest active:scale-95 transition-transform"><i class="fa-solid fa-check text-xl mb-1 block"></i> Entregado</button></div>
                 </div>`).join('');
             
             renderControl(); updateClocks();
         }
 
         function updateClocks() { document.querySelectorAll('.clock').forEach(el => { const s = parseInt(el.getAttribute('data-start')); const diff = Math.floor((Date.now() - s) / 1000); const m = Math.floor(diff / 60).toString().padStart(2, '0'); const sc = (diff % 60).toString().padStart(2, '0'); el.innerText = `⏱️ ${m}:${sc}`; if(diff > 900) el.classList.add('timer-alert'); }); }
-        
-        window.switchTab = (t) => { 
-            ['pos', 'kitchen', 'delivery', 'control'].forEach(n => { 
-                document.getElementById('view-'+n).classList.add('hidden'); 
-                document.getElementById('btn-'+n).classList.remove('tab-active'); document.getElementById('btn-'+n).classList.add('tab-inactive');
-            }); 
-            document.getElementById('view-'+t).classList.remove('hidden'); 
-            document.getElementById('btn-'+t).classList.remove('tab-inactive'); document.getElementById('btn-'+t).classList.add('tab-active');
-        };
+        window.switchTab = (t) => { ['pos', 'kitchen', 'delivery', 'control'].forEach(n => { document.getElementById('view-'+n).classList.add('hidden'); document.getElementById('btn-'+n).classList.remove('tab-active'); document.getElementById('btn-'+n).classList.add('tab-inactive'); }); document.getElementById('view-'+t).classList.remove('hidden'); document.getElementById('btn-'+t).classList.remove('tab-inactive'); document.getElementById('btn-'+t).classList.add('tab-active'); };
 
         initUI();
     </script>
