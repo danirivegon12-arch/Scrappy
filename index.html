@@ -74,7 +74,7 @@
             </div>
         </section>
 
-        <!-- VISTAS COCINA, REPARTO Y CONTROL -->
+        <!-- VISTAS COCINA Y REPARTO -->
         <section id="view-kitchen" class="p-4 hidden space-y-4 bg-slate-100 min-h-full">
             <h2 class="text-xl font-black text-slate-800 uppercase italic tracking-tighter"><span class="text-2xl">🍳</span> Pedidos Activos</h2>
             <div id="kitchen-list" class="space-y-4 pb-10"></div>
@@ -146,19 +146,17 @@
                 </div>
             </div>
 
-            <!-- Aderezos para Alitas / Boneless -->
             <div id="m-sauce-sec" class="mb-6 hidden">
-                <p class="text-[10px] font-black text-orange-600 uppercase tracking-widest mb-3">🌶️ Aderezos <span id="sauce-req-text"></span>:</p>
+                <p class="text-[10px] font-black text-orange-600 uppercase tracking-widest mb-3">🌶️ Aderezos <span id="sauce-req-text">(Elige 1 o 2)</span>:</p>
                 <div class="grid grid-cols-2 gap-3" id="sauce-grid"></div>
             </div>
 
             <div id="m-sweet-sec" class="mb-6 hidden"><p class="text-[10px] font-black text-pink-500 uppercase tracking-widest mb-3">🍓 Ingredientes (Elige hasta 3):</p><div class="grid grid-cols-2 gap-3" id="sweet-grid"></div></div>
-            <div id="m-veg-sec" class="mb-6 hidden"><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">❌ Quitar (Verduras y Aderezos base):</p><div class="flex flex-wrap gap-2" id="veg-grid"></div></div>
-            <div id="m-ext-sec" class="mb-6 hidden"><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">➕ Complementos y Salsas Extra:</p><div class="flex flex-wrap gap-2" id="ext-grid"></div></div>
+            <div id="m-veg-sec" class="mb-6 hidden"><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">❌ Quitar (Verduras/Aderezos):</p><div class="flex flex-wrap gap-2" id="veg-grid"></div></div>
+            <div id="m-ext-sec" class="mb-6 hidden"><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">➕ Complementos Extra:</p><div class="flex flex-wrap gap-2" id="ext-grid"></div></div>
 
-            <!-- Extra Genérico $10 -->
             <div class="flex justify-between items-center bg-slate-50 p-4 rounded-2xl mb-6 border border-slate-200">
-                <span class="font-black text-sm uppercase italic text-slate-700">Cualquier Extra Múltiple ($10)</span>
+                <span class="font-black text-sm uppercase italic text-slate-700">Cualquier Extra ($10)</span>
                 <div class="flex items-center gap-4">
                     <button onclick="changeGenExt(-1)" class="w-10 h-10 bg-white border border-slate-300 rounded-full font-black text-slate-400 text-xl">-</button><span id="m-gen-val" class="font-black text-2xl text-orange-600 w-6 text-center">0</span><button onclick="changeGenExt(1)" class="w-10 h-10 bg-orange-600 text-white rounded-full font-black text-xl shadow-md">+</button>
                 </div>
@@ -186,23 +184,20 @@
 
     <script>
         // ==========================================
-        // 1. DATOS DEL MENÚ Y LISTAS ESPECÍFICAS
+        // 1. DATOS DEL MENÚ
         // ==========================================
         const menu = [
             { cat: "Hamb. Res", icon: "🍔", items: [ { id: 'r1', n: "Scrappy Clasica", p: 60, v: 'burger', e: true }, { id: 'r2', n: "Tocino Crunch", p: 70, v: 'burger', e: true }, { id: 'r3', n: "Double Cheese Chipotle", p: 75, v: 'burger', e: true }, { id: 'r4', n: "Big Scrappy", p: 80, v: 'burger', e: true } ] },
             { cat: "Hamb. Pollo", icon: "🐔", items: [ { id: 'p1', n: "Simple Chiken", p: 60, v: 'burger', e: true }, { id: 'p2', n: "Big Chiken", p: 70, v: 'burger', e: true } ] },
             { cat: "Especialidades", icon: "🥪", items: [ { id: 'e1', n: "Lonche", p: 44, v: 'burger', e: true, meat: true }, { id: 'e2', n: "Sandwich", p: 30, v: 'burger', e: true, meat: true }, { id: 'e3', n: "2 Sincronizadas", p: 45, v: 'burger', e: true, meat: true }, { id: 'e4', n: "2 Quesadillas Harina", p: 50, v: false, e: true }, { id: 'b5', n: "Waffles", p: 45, sweet: true }, { id: 'b6', n: "Crepas", p: 40, sweet: true } ] },
-            { cat: "Snacks", icon: "🍟", items: [ { id: 's1', n: "Alitas (Medio Kilo)", p: 100, e: true, reqSauces: 2 }, { id: 's2', n: "Boneless", p: 99, e: true, reqSauces: 2 }, { id: 's3', n: "Papas Gajo", p: 45, e: true }, { id: 's4', n: "Papas Gajo Queso", p: 65, e: true }, { id: 's5', n: "Papa Francesa", p: 35, e: true }, { id: 's6', n: "Dedos de Queso", p: 80, e: true }, { id: 's7', n: "Aros Cebolla", p: 60, e: true }, { id: 's8', n: "Hot Dog Sencillo", p: 25, v: 'hotdog', e: true }, { id: 's9', n: "Hot Dog Tocino", p: 32, v: 'hotdog', e: true } ] },
+            { cat: "Snacks", icon: "🍟", items: [ { id: 's1', n: "Alitas (Medio Kilo)", p: 100, e: true, hasSauce: true }, { id: 's2', n: "Boneless", p: 99, e: true, hasSauce: true }, { id: 's3', n: "Papas Gajo", p: 45, e: true }, { id: 's4', n: "Papas Gajo Queso", p: 65, e: true }, { id: 's5', n: "Papa Francesa", p: 35, e: true }, { id: 's6', n: "Dedos de Queso", p: 80, e: true }, { id: 's7', n: "Aros Cebolla", p: 60, e: true }, { id: 's8', n: "Hot Dog Sencillo", p: 25, v: 'hotdog', e: true }, { id: 's9', n: "Hot Dog Tocino", p: 32, v: 'hotdog', e: true } ] },
             { cat: "Bebidas", icon: "🥤", items: [ { id: 'b1', n: "Coca 500ml", p: 24 }, { id: 'b2', n: "Coca 250ml", p: 12 }, { id: 'b3', n: "Malteada", p: 25 }, { id: 'b4', n: "Perla Explosiva", p: 50 } ] }
         ];
 
         const VEG_BURGER = ["Jitomate", "Cebolla", "Lechuga", "Jalapeño", "Aguacate", "Catsup", "Mostaza"];
         const VEG_HOTDOG = ["Jitomate", "Cebolla asada", "Jalapeño", "Catsup", "Mostaza"];
         const SAUCES = ["Ranch", "BBQ", "Búfalo", "Mango Habanero"];
-        const EXT = [
-            { n: "Papas Francesa", p: 18 }, { n: "Aros Cebolla", p: 10 }, { n: "Salchicha Frita", p: 10 },
-            { n: "Extra Ranch", p: 10 }, { n: "Extra BBQ", p: 10 }, { n: "Extra Búfalo", p: 10 }, { n: "Extra Mango Hab.", p: 10 }
-        ];
+        const EXT = [ { n: "Papas Francesa", p: 18 }, { n: "Aros Cebolla", p: 10 }, { n: "Salchicha Frita", p: 10 }, { n: "Extra Ranch", p: 10 }, { n: "Extra BBQ", p: 10 }, { n: "Extra Búfalo", p: 10 }, { n: "Extra Mango Hab.", p: 10 } ];
         const MEATS = ["Pierna", "Jamón", "Pollo", "Mixto"];
         const SWEETS = ["Fresa", "Manzana", "Plátano", "Chocolate", "Lechera", "Miel de Maple"];
 
@@ -265,9 +260,7 @@
             const eSec = document.getElementById('m-ext-sec'); if (it.e) { eSec.classList.remove('hidden'); renderExt(); } else { eSec.classList.add('hidden'); }
             const mSec = document.getElementById('m-meat-sec'); if (it.meat) { mSec.classList.remove('hidden'); renderMeat(); } else { mSec.classList.add('hidden'); }
             const swSec = document.getElementById('m-sweet-sec'); if (it.sweet) { swSec.classList.remove('hidden'); renderSweet(); } else { swSec.classList.add('hidden'); }
-            
-            const sSec = document.getElementById('m-sauce-sec'); 
-            if (it.reqSauces) { sSec.classList.remove('hidden'); document.getElementById('sauce-req-text').innerText = `(Obligatorio elegir ${it.reqSauces})`; renderSauces(); } else { sSec.classList.add('hidden'); }
+            const sSec = document.getElementById('m-sauce-sec'); if (it.hasSauce) { sSec.classList.remove('hidden'); renderSauces(); } else { sSec.classList.add('hidden'); }
             
             calcM(); document.getElementById('modal').classList.replace('hidden', 'flex');
         };
@@ -290,7 +283,7 @@
         window.togSweet = (s) => { const idx = curItem.sweetOpts.indexOf(s); if (idx === -1) { if (curItem.sweetOpts.length >= 3) return alert("Límite de 3 ingredientes superado."); curItem.sweetOpts.push(s); } else { curItem.sweetOpts.splice(idx, 1); } renderSweet(); };
 
         function renderSauces() { document.getElementById('sauce-grid').innerHTML = SAUCES.map(s => `<label class="cursor-pointer w-full"><input type="checkbox" class="hidden btn-sauce" ${curItem.selSauces.includes(s) ? 'checked' : ''} onchange="togSauce('${s}')"><div class="border-2 border-slate-200 bg-white rounded-2xl p-3 text-center text-xs font-black text-slate-500 uppercase transition-all">${s}</div></label>`).join(''); }
-        window.togSauce = (s) => { const idx = curItem.selSauces.indexOf(s); if (idx === -1) { if (curItem.selSauces.length >= curItem.reqSauces) return alert(`Solo puedes elegir ${curItem.reqSauces} aderezos.`); curItem.selSauces.push(s); } else { curItem.selSauces.splice(idx, 1); } renderSauces(); };
+        window.togSauce = (s) => { const idx = curItem.selSauces.indexOf(s); if (idx === -1) { if (curItem.selSauces.length >= 2) return alert(`Límite de 2 aderezos alcanzado.`); curItem.selSauces.push(s); } else { curItem.selSauces.splice(idx, 1); } renderSauces(); };
 
         window.changeGenExt = (v) => { if(curItem.gen+v >= 0) curItem.gen += v; document.getElementById('m-gen-val').innerText = curItem.gen; calcM(); };
         window.changeQty = (v) => { if(curItem.qty+v >= 1) curItem.qty += v; document.getElementById('m-qty').innerText = curItem.qty; calcM(); };
@@ -300,7 +293,7 @@
             if(curItem.needsMeat && !curItem.meat) return alert("Falta elegir carne.");
             if(curItem.meat === 'Mixto' && curItem.mixed.length !== 2) return alert("Debes elegir 2 carnes pal Mixto.");
             if(curItem.sweet && curItem.sweetOpts.length === 0) return alert("Selecciona mínimo 1 ingrediente.");
-            if(curItem.reqSauces && curItem.selSauces.length !== curItem.reqSauces) return alert(`Debes elegir exactamente ${curItem.reqSauces} aderezos.`);
+            if(curItem.hasSauce && curItem.selSauces.length === 0) return alert(`Debes elegir al menos 1 aderezo.`);
             curItem.notes = document.getElementById('m-notes').value.trim();
             cart.push(curItem); renderCart(); closeModal();
         };
@@ -412,7 +405,7 @@
         }
 
         // ==========================================
-        // LÓGICA DE CONTROL Y FINANZAS
+        // LÓGICA DE CONTROL (FINANZAS)
         // ==========================================
         window.openExpense = () => { document.getElementById('exp-amount').value = ''; document.getElementById('exp-desc').value = ''; document.getElementById('modal-expense').classList.replace('hidden', 'flex'); };
         window.closeExpense = () => { document.getElementById('modal-expense').classList.replace('flex', 'hidden'); };
@@ -522,7 +515,7 @@
                                 ${i.selSauces && i.selSauces.length ? `<p class="text-orange-600">🌶️ SALSAS: ${i.selSauces.join(', ')}</p>` : ''}
                                 ${i.removed && i.removed.length ? `<p class="text-red-500">❌ Sin: ${i.removed.join(', ')}</p>` : ''}
                                 ${i.extras && i.extras.length ? `<p class="text-green-600">➕ Con: ${i.extras.map(x=>x.n).join(', ')}</p>` : ''}
-                                ${i.gen ? `<p class="text-purple-600">➕ Extra $10: x${i.gen}</p>` : ''}
+                                ${i.gen ? `<p class="text-purple-600">➕ Extras Gen: x${i.gen}</p>` : ''}
                                 ${i.notes ? `<p class="text-blue-500 underline">Nota: ${i.notes}</p>` : ''}
                             </div></div>`).join('')}
                     </div>
