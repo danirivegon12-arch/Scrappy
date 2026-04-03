@@ -69,10 +69,8 @@
                 <h3 class="font-black text-slate-400 text-[10px] uppercase tracking-widest border-b border-slate-600 pb-3 mb-4">Datos de Entrega</h3>
                 
                 <div class="space-y-3 mb-4">
-                    <!-- ENVOLTURA RELATIVA PARA EL AUTOCOMPLETADO -->
                     <div class="relative">
                         <input type="text" id="cust-name" oninput="handleNameInput(this.value)" autocomplete="off" placeholder="Nombre del cliente *" class="w-full p-4 bg-slate-700 text-white placeholder-slate-400 border border-slate-600 rounded-2xl focus:ring-2 focus:ring-orange-500 outline-none font-bold">
-                        <!-- LISTA DESPLEGABLE DE AUTOCOMPLETADO -->
                         <div id="autocomplete-list" class="absolute z-50 w-full bg-white rounded-xl shadow-2xl border border-slate-200 mt-1 hidden max-h-48 overflow-y-auto">
                             <!-- Inyectado por JS -->
                         </div>
@@ -136,7 +134,7 @@
         </div>
     </div>
 
-    <!-- Modal Contraseña -->
+    <!-- Modal Contraseña para Borrar -->
     <div id="modal-password" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm hidden justify-center items-center z-[80] p-4">
         <div class="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl animate-[slideIn_0.2s_ease-out] text-center">
             <div class="text-4xl text-red-500 mb-3"><i class="fa-solid fa-lock"></i></div>
@@ -148,6 +146,22 @@
             <div class="flex gap-3">
                 <button onclick="closePasswordModal()" class="flex-1 bg-slate-100 text-slate-500 font-black py-4 rounded-xl uppercase text-xs">Cancelar</button>
                 <button onclick="confirmDelete()" class="flex-1 bg-red-600 text-white font-black py-4 rounded-xl uppercase text-sm shadow-lg active:scale-95 transition-transform">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Contraseña para Acceso a Control -->
+    <div id="modal-auth-control" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm hidden justify-center items-center z-[80] p-4">
+        <div class="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl animate-[slideIn_0.2s_ease-out] text-center">
+            <div class="text-4xl text-orange-500 mb-3"><i class="fa-solid fa-lock"></i></div>
+            <h3 class="text-xl font-black text-slate-800 mb-2 uppercase italic tracking-tighter">Acceso Restringido</h3>
+            <p class="text-xs text-slate-500 mb-6">Ingresa la contraseña de administrador para ver las finanzas.</p>
+            
+            <input type="password" inputmode="numeric" pattern="[0-9]*" id="auth-pass" placeholder="Contraseña" class="w-full p-4 bg-slate-50 border rounded-xl font-black text-2xl text-center text-slate-800 outline-none focus:border-orange-500 mb-6 tracking-[0.5em]">
+            
+            <div class="flex gap-3">
+                <button onclick="closeAuthControl()" class="flex-1 bg-slate-100 text-slate-500 font-black py-4 rounded-xl uppercase text-xs">Cancelar</button>
+                <button onclick="confirmAuthControl()" class="flex-1 bg-orange-600 text-white font-black py-4 rounded-xl uppercase text-sm shadow-lg active:scale-95 transition-transform">Entrar</button>
             </div>
         </div>
     </div>
@@ -200,19 +214,19 @@
         </div>
     </div>
 
-    <!-- Nav Inferior -->
+    <!-- Nav Inferior (Se cambió el onclick de Control) -->
     <nav class="fixed bottom-0 w-full bg-white border-t border-slate-200 flex z-50 shadow-[0_-4px_15px_rgba(0,0,0,0.05)] pb-safe">
         <button onclick="switchTab('pos')" id="btn-pos" class="flex-1 py-3 flex flex-col items-center tab-active transition-all relative"><i class="fa-solid fa-cash-register text-xl mb-1"></i><span class="text-[9px] font-black uppercase tracking-widest">Captura</span></button>
         <button onclick="switchTab('kitchen')" id="btn-kitchen" class="flex-1 py-3 flex flex-col items-center tab-inactive transition-all relative border-l border-slate-100"><i class="fa-solid fa-fire text-xl mb-1"></i><span class="text-[9px] font-black uppercase tracking-widest">Cocina</span><span id="badge-k" class="absolute top-1 right-2 bg-red-500 text-white text-[9px] font-black px-1.5 rounded-full hidden shadow-md">0</span></button>
         <button onclick="switchTab('delivery')" id="btn-delivery" class="flex-1 py-3 flex flex-col items-center tab-inactive transition-all relative border-x border-slate-100"><i class="fa-solid fa-motorcycle text-xl mb-1"></i><span class="text-[9px] font-black uppercase tracking-widest">Reparto</span><span id="badge-d" class="absolute top-1 right-2 bg-orange-500 text-white text-[9px] font-black px-1.5 rounded-full hidden shadow-md">0</span></button>
-        <button onclick="switchTab('control')" id="btn-control" class="flex-1 py-3 flex flex-col items-center tab-inactive transition-all relative"><i class="fa-solid fa-chart-pie text-xl mb-1"></i><span class="text-[9px] font-black uppercase tracking-widest">Control</span></button>
+        <button onclick="attemptSwitchControl()" id="btn-control" class="flex-1 py-3 flex flex-col items-center tab-inactive transition-all relative"><i class="fa-solid fa-chart-pie text-xl mb-1"></i><span class="text-[9px] font-black uppercase tracking-widest">Control</span></button>
     </nav>
 
     <script>
         // ==========================================
         // 1. CONFIGURACIÓN Y DATOS DE MENÚ
         // ==========================================
-        const ADMIN_PASS = "58654";
+        const ADMIN_PASS = "58654"; 
 
         const menu = [
             { cat: "Hamb. Res", icon: "🍔", items: [ { id: 'r1', n: "Scrappy Clasica", p: 60, v: 'burger', e: true }, { id: 'r2', n: "Tocino Crunch", p: 70, v: 'burger', e: true }, { id: 'r3', n: "Double Cheese Chipotle", p: 75, v: 'burger', e: true }, { id: 'r4', n: "Big Scrappy", p: 80, v: 'burger', e: true } ] },
@@ -229,19 +243,16 @@
         const MEATS = ["Pierna", "Jamón", "Pollo", "Mixto"];
         const SWEETS = ["Fresa", "Manzana", "Plátano", "Chocolate", "Lechera", "Miel de Maple"];
 
-        // ==========================================
-        // 2. ESTADO GLOBAL
-        // ==========================================
         let cart = []; let curItem = null; let editId = null; let idToDelete = null;
         let localOrders = JSON.parse(localStorage.getItem('scrappy_db')) || [];
         let localExpenses = JSON.parse(localStorage.getItem('scrappy_exp')) || []; 
-        let localCustomers = JSON.parse(localStorage.getItem('scrappy_cust')) || []; // Cartera de Clientes
+        let localCustomers = JSON.parse(localStorage.getItem('scrappy_cust')) || []; 
         
         let ghUser = localStorage.getItem('gh_user') || ''; let ghRepo = localStorage.getItem('gh_repo') || ''; let ghToken = localStorage.getItem('gh_token') || '';
         let ghSha = null; let isSyncing = false;
 
         // ==========================================
-        // 3. UI PRINCIPAL
+        // 3. UI PRINCIPAL Y WHATSAPP
         // ==========================================
         function initUI() {
             const catGrid = document.getElementById('pos-categories');
@@ -259,38 +270,18 @@
             document.getElementById('pos-items').classList.replace('hidden', 'flex');
         };
 
-        // --- CERRAR AUTOCOMPLETADO SI CLICKEA FUERA ---
-        document.addEventListener('click', function(e) {
-            if(e.target.id !== 'cust-name') {
-                document.getElementById('autocomplete-list').classList.add('hidden');
-            }
-        });
+        document.addEventListener('click', function(e) { if(e.target.id !== 'cust-name') { document.getElementById('autocomplete-list').classList.add('hidden'); } });
 
-        // --- FUNCIÓN AUTOCOMPLETADO MÁGICO ---
         window.handleNameInput = (val) => {
             const list = document.getElementById('autocomplete-list');
             if (!val.trim()) { list.classList.add('hidden'); return; }
-            
-            const q = val.toLowerCase();
-            const matches = localCustomers.filter(c => c.name.toLowerCase().includes(q));
-            
+            const q = val.toLowerCase(); const matches = localCustomers.filter(c => c.name.toLowerCase().includes(q));
             if (matches.length === 0) { list.classList.add('hidden'); return; }
-
-            list.innerHTML = matches.map(c => `
-                <div onclick="selectCustomer('${c.phone || ''}', '${c.name.replace(/'/g, "\\'")}', '${c.address.replace(/'/g, "\\'")}')" class="p-4 border-b border-slate-100 active:bg-orange-50 cursor-pointer transition-colors last:border-0 hover:bg-slate-50">
-                    <div class="font-black text-slate-800 uppercase italic">${c.name}</div>
-                    <div class="text-[10px] font-bold text-slate-400 mt-1 truncate"><i class="fa-solid fa-location-dot mr-1 text-slate-300"></i>${c.address} ${c.phone ? `&nbsp;•&nbsp; <i class="fa-solid fa-phone mx-1 text-orange-400"></i>${c.phone}` : ''}</div>
-                </div>
-            `).join('');
+            list.innerHTML = matches.map(c => `<div onclick="selectCustomer('${c.phone || ''}', '${c.name.replace(/'/g, "\\'")}', '${c.address.replace(/'/g, "\\'")}')" class="p-4 border-b border-slate-100 active:bg-orange-50 cursor-pointer transition-colors last:border-0 hover:bg-slate-50"><div class="font-black text-slate-800 uppercase italic">${c.name}</div><div class="text-[10px] font-bold text-slate-400 mt-1 truncate"><i class="fa-solid fa-location-dot mr-1 text-slate-300"></i>${c.address} ${c.phone ? `&nbsp;•&nbsp; <i class="fa-solid fa-phone mx-1 text-orange-400"></i>${c.phone}` : ''}</div></div>`).join('');
             list.classList.remove('hidden');
         };
 
-        window.selectCustomer = (phone, name, address) => {
-            document.getElementById('cust-name').value = name;
-            document.getElementById('cust-addr').value = address;
-            document.getElementById('cust-phone').value = phone;
-            document.getElementById('autocomplete-list').classList.add('hidden');
-        };
+        window.selectCustomer = (phone, name, address) => { document.getElementById('cust-name').value = name; document.getElementById('cust-addr').value = address; document.getElementById('cust-phone').value = phone; document.getElementById('autocomplete-list').classList.add('hidden'); };
 
         window.sendTicketWS = (id) => {
             const o = localOrders.find(x => x.id === id); if(!o || !o.phone) return alert("No hay número registrado.");
@@ -388,17 +379,10 @@
                 orderObj.id = 'ord_' + now + '_' + Math.floor(Math.random()*1000); orderObj.created = now; orderObj.timeStr = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); orderObj.status = 'p'; localOrders.push(orderObj);
             }
 
-            // AUTO-GUARDAR EN CARTERA DE CLIENTES
             if (n && a) {
                 let existingIdx = -1;
-                if (t) existingIdx = localCustomers.findIndex(c => c.phone === t);
-                else existingIdx = localCustomers.findIndex(c => c.name.toLowerCase() === n.toLowerCase());
-
-                if (existingIdx > -1) {
-                    localCustomers[existingIdx].name = n; localCustomers[existingIdx].address = a; localCustomers[existingIdx].phone = t; localCustomers[existingIdx].updatedAt = now;
-                } else {
-                    localCustomers.push({ id: 'cust_' + now, name: n, address: a, phone: t, updatedAt: now });
-                }
+                if (t) existingIdx = localCustomers.findIndex(c => c.phone === t); else existingIdx = localCustomers.findIndex(c => c.name.toLowerCase() === n.toLowerCase());
+                if (existingIdx > -1) { localCustomers[existingIdx].name = n; localCustomers[existingIdx].address = a; localCustomers[existingIdx].phone = t; localCustomers[existingIdx].updatedAt = now; } else { localCustomers.push({ id: 'cust_' + now, name: n, address: a, phone: t, updatedAt: now }); }
             }
 
             saveDataLocal(); cart = []; renderCart(); document.getElementById('cust-name').value = ""; document.getElementById('cust-addr').value = ""; document.getElementById('cust-phone').value = ""; editId = null; document.getElementById('save-text').innerText = "Enviar a Cocina"; updateViews(); switchTab('kitchen'); syncWithGitHub(); 
@@ -419,13 +403,7 @@
         
         window.confirmDelete = () => {
             if (document.getElementById('del-pass').value === ADMIN_PASS) {
-                if(idToDelete.startsWith('exp_')) {
-                    const idx = localExpenses.findIndex(e => e.id === idToDelete);
-                    if(idx > -1) { localExpenses[idx].status = 'd'; localExpenses[idx].updatedAt = Date.now(); }
-                } else {
-                    const idx = localOrders.findIndex(o => o.id === idToDelete);
-                    if(idx > -1) { localOrders[idx].status = 'd'; localOrders[idx].updatedAt = Date.now(); }
-                }
+                if(idToDelete.startsWith('exp_')) { const idx = localExpenses.findIndex(e => e.id === idToDelete); if(idx > -1) { localExpenses[idx].status = 'd'; localExpenses[idx].updatedAt = Date.now(); } } else { const idx = localOrders.findIndex(o => o.id === idToDelete); if(idx > -1) { localOrders[idx].status = 'd'; localOrders[idx].updatedAt = Date.now(); } }
                 saveDataLocal(); updateViews(); syncWithGitHub(); closePasswordModal();
             } else { alert("Contraseña incorrecta."); }
         };
@@ -490,8 +468,29 @@
         }
 
         // ==========================================
-        // 7. LÓGICA DE CONTROL (FINANZAS, HISTORIAL Y PDF)
+        // 7. LÓGICA DE CONTROL Y SEGURIDAD
         // ==========================================
+        
+        // --- NUEVA LÓGICA DE SEGURIDAD PARA LA PESTAÑA DE CONTROL ---
+        window.attemptSwitchControl = () => {
+            document.getElementById('auth-pass').value = '';
+            document.getElementById('modal-auth-control').classList.replace('hidden', 'flex');
+            setTimeout(() => document.getElementById('auth-pass').focus(), 100);
+        };
+        
+        window.closeAuthControl = () => {
+            document.getElementById('modal-auth-control').classList.replace('flex', 'hidden');
+        };
+        
+        window.confirmAuthControl = () => {
+            if (document.getElementById('auth-pass').value === ADMIN_PASS) {
+                closeAuthControl();
+                actualSwitchTab('control'); // Si es correcta, entra
+            } else {
+                alert("Contraseña incorrecta. Acceso Denegado.");
+            }
+        };
+
         window.switchControlTab = (tab) => {
             if(tab === 'finanzas') {
                 document.getElementById('tab-finanzas').classList.add('bg-white', 'text-slate-800', 'shadow-sm'); document.getElementById('tab-finanzas').classList.remove('text-slate-500');
@@ -623,7 +622,24 @@
         }
 
         function updateClocks() { document.querySelectorAll('.clock').forEach(el => { const s = parseInt(el.getAttribute('data-start')); const diff = Math.floor((Date.now() - s) / 1000); const m = Math.floor(diff / 60).toString().padStart(2, '0'); const sc = (diff % 60).toString().padStart(2, '0'); el.innerText = `⏱️ ${m}:${sc}`; if(diff > 900) el.classList.add('timer-alert'); }); }
-        window.switchTab = (t) => { ['pos', 'kitchen', 'delivery', 'control'].forEach(n => { document.getElementById('view-'+n).classList.add('hidden'); document.getElementById('btn-'+n).classList.remove('tab-active'); document.getElementById('btn-'+n).classList.add('tab-inactive'); }); document.getElementById('view-'+t).classList.remove('hidden'); document.getElementById('btn-'+t).classList.remove('tab-inactive'); document.getElementById('btn-'+t).classList.add('tab-active'); };
+        
+        window.switchTab = (t) => { 
+            // NUEVO: Proteger la pestaña "control"
+            if(t === 'control') {
+                attemptSwitchControl();
+                return; // Se detiene aquí, la función confirmAuthControl hará el cambio real
+            }
+            actualSwitchTab(t);
+        };
+
+        window.actualSwitchTab = (t) => {
+            ['pos', 'kitchen', 'delivery', 'control'].forEach(n => { 
+                document.getElementById('view-'+n).classList.add('hidden'); 
+                document.getElementById('btn-'+n).classList.remove('tab-active'); document.getElementById('btn-'+n).classList.add('tab-inactive');
+            }); 
+            document.getElementById('view-'+t).classList.remove('hidden'); 
+            document.getElementById('btn-'+t).classList.remove('tab-inactive'); document.getElementById('btn-'+t).classList.add('tab-active');
+        }
 
         initUI();
     </script>
