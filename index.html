@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scrappy POS - GitHub Sync</title>
+    <title>Scrappy POS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
@@ -35,10 +35,12 @@
         </div>
     </header>
 
-    <!-- Main Content -->
-    <main class="flex-1 overflow-y-auto pb-32 relative">
+    <!-- Main Content (pb-36 para que no se esconda nada en celulares) -->
+    <main class="flex-1 overflow-y-auto pb-36 relative">
         
-        <!-- VISTA 1: CAPTURA (POS) -->
+        <!-- ==========================================
+             VISTA 1: CAPTURA (POS)
+             ========================================== -->
         <section id="view-pos" class="p-4 flex flex-col gap-4">
             
             <div class="bg-white border-2 border-slate-200 rounded-3xl p-4 shadow-sm flex-shrink-0 sticky top-0 z-10">
@@ -74,7 +76,9 @@
             </div>
         </section>
 
-        <!-- VISTAS COCINA Y REPARTO -->
+        <!-- ==========================================
+             VISTA 2 Y 3: COCINA Y REPARTO
+             ========================================== -->
         <section id="view-kitchen" class="p-4 hidden space-y-4 bg-slate-100 min-h-full">
             <h2 class="text-xl font-black text-slate-800 uppercase italic tracking-tighter"><span class="text-2xl">🍳</span> Pedidos Activos</h2>
             <div id="kitchen-list" class="space-y-4 pb-10"></div>
@@ -91,21 +95,14 @@
     <div id="modal-config" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm hidden justify-center items-center z-[70] p-4">
         <div class="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl animate-[slideIn_0.2s_ease-out]">
             <h3 class="text-2xl font-black text-slate-800 mb-2"><i class="fa-brands fa-github"></i> Sincronización</h3>
-            <p class="text-xs text-slate-500 mb-6">Conecta tu aplicación con tu repositorio de GitHub para que la base de datos se fusione entre celulares.</p>
+            <p class="text-xs text-slate-500 mb-6">Conecta tu aplicación con tu repositorio de GitHub para fusionar pedidos en la nube.</p>
+            
             <div class="space-y-4 mb-6">
-                <div>
-                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Usuario de GitHub</label>
-                    <input type="text" id="cfg-user" placeholder="Ej. juandaniel99" class="w-full p-3 bg-slate-50 border rounded-xl font-bold text-slate-700 outline-none focus:border-orange-500">
-                </div>
-                <div>
-                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Nombre del Repositorio</label>
-                    <input type="text" id="cfg-repo" placeholder="Ej. scrappy-app" class="w-full p-3 bg-slate-50 border rounded-xl font-bold text-slate-700 outline-none focus:border-orange-500">
-                </div>
-                <div>
-                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Token de Acceso (PAT)</label>
-                    <input type="password" id="cfg-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxxx" class="w-full p-3 bg-slate-50 border rounded-xl font-bold text-slate-700 outline-none focus:border-orange-500 text-xs">
-                </div>
+                <div><label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Usuario de GitHub</label><input type="text" id="cfg-user" placeholder="Ej. juandaniel99" class="w-full p-3 bg-slate-50 border rounded-xl font-bold text-slate-700 outline-none focus:border-orange-500"></div>
+                <div><label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Nombre del Repositorio</label><input type="text" id="cfg-repo" placeholder="Ej. scrappy-app" class="w-full p-3 bg-slate-50 border rounded-xl font-bold text-slate-700 outline-none focus:border-orange-500"></div>
+                <div><label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Token de Acceso (PAT)</label><input type="password" id="cfg-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxxx" class="w-full p-3 bg-slate-50 border rounded-xl font-bold text-slate-700 outline-none focus:border-orange-500 text-xs"></div>
             </div>
+            
             <div class="flex gap-3">
                 <button onclick="closeConfig()" class="flex-1 bg-slate-100 text-slate-500 font-black py-4 rounded-xl uppercase text-xs">Cancelar</button>
                 <button onclick="saveConfig()" class="flex-[2] bg-slate-800 text-white font-black py-4 rounded-xl uppercase text-sm shadow-lg">Guardar y Conectar</button>
@@ -113,7 +110,7 @@
         </div>
     </div>
 
-    <!-- Modal Personalización -->
+    <!-- Modal Personalización Producto -->
     <div id="modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden justify-center items-end z-[60]">
         <div class="bg-white rounded-t-[2.5rem] w-full max-w-lg p-6 pb-10 shadow-2xl overflow-y-auto max-h-[90vh]">
             <div class="flex justify-between items-start border-b border-slate-100 pb-4 mb-4">
@@ -124,7 +121,6 @@
                 <button onclick="closeModal()" class="bg-slate-100 text-slate-400 w-10 h-10 rounded-full font-black text-xl flex items-center justify-center">&times;</button>
             </div>
 
-            <!-- Modificadores -->
             <div id="m-meat-sec" class="mb-6 hidden">
                 <p class="text-[10px] font-black text-red-500 uppercase tracking-widest mb-3">🥩 Carne Requerida:</p>
                 <div class="grid grid-cols-2 gap-3" id="meat-grid"></div>
@@ -161,16 +157,16 @@
         </div>
     </div>
 
-    <!-- Nav Inferior -->
+    <!-- Nav Inferior (Se corrigió la clase "relative" para evitar bugs con los badges) -->
     <nav class="fixed bottom-0 w-full bg-white border-t border-slate-200 flex z-50 shadow-[0_-4px_15px_rgba(0,0,0,0.05)] pb-safe">
-        <button onclick="switchTab('pos')" id="btn-pos" class="flex-1 py-4 flex flex-col items-center tab-active transition-all"><i class="fa-solid fa-cash-register text-2xl mb-1"></i><span class="text-[9px] font-black uppercase tracking-widest">Captura</span></button>
-        <button onclick="switchTab('kitchen')" id="btn-kitchen" class="flex-1 py-4 flex flex-col items-center tab-inactive transition-all relative border-x border-slate-100"><i class="fa-solid fa-fire text-2xl mb-1"></i><span class="text-[9px] font-black uppercase tracking-widest">Cocina</span><span id="badge-k" class="absolute top-2 right-4 bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full hidden border-2 border-white">0</span></button>
-        <button onclick="switchTab('delivery')" id="btn-delivery" class="flex-1 py-4 flex flex-col items-center tab-inactive transition-all relative"><i class="fa-solid fa-motorcycle text-2xl mb-1"></i><span class="text-[9px] font-black uppercase tracking-widest">Reparto</span><span id="badge-d" class="absolute top-2 right-4 bg-orange-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full hidden border-2 border-white">0</span></button>
+        <button onclick="switchTab('pos')" id="btn-pos" class="flex-1 py-4 flex flex-col items-center relative transition-all tab-active"><i class="fa-solid fa-cash-register text-2xl mb-1"></i><span class="text-[9px] font-black uppercase tracking-widest">Captura</span></button>
+        <button onclick="switchTab('kitchen')" id="btn-kitchen" class="flex-1 py-4 flex flex-col items-center relative border-x border-slate-100 transition-all tab-inactive"><i class="fa-solid fa-fire text-2xl mb-1"></i><span class="text-[9px] font-black uppercase tracking-widest">Cocina</span><span id="badge-k" class="absolute top-2 right-4 bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full hidden border-2 border-white shadow-md">0</span></button>
+        <button onclick="switchTab('delivery')" id="btn-delivery" class="flex-1 py-4 flex flex-col items-center relative transition-all tab-inactive"><i class="fa-solid fa-motorcycle text-2xl mb-1"></i><span class="text-[9px] font-black uppercase tracking-widest">Reparto</span><span id="badge-d" class="absolute top-2 right-4 bg-orange-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full hidden border-2 border-white shadow-md">0</span></button>
     </nav>
 
     <script>
         // ==========================================
-        // 1. DATOS DEL MENÚ
+        // 1. DATOS DEL MENÚ 
         // ==========================================
         const menu = [
             { cat: "Hamb. Res", icon: "🍔", items: [ { id: 'r1', n: "Scrappy Clasica", p: 60, v: true, e: true }, { id: 'r2', n: "Tocino Crunch", p: 70, v: true, e: true }, { id: 'r3', n: "Double Cheese Chipotle", p: 75, v: true, e: true }, { id: 'r4', n: "Big Scrappy", p: 80, v: true, e: true } ] },
@@ -185,16 +181,13 @@
         const MEATS = ["Pierna", "Jamón", "Pollo", "Mixto"];
         const SWEETS = ["Fresa", "Manzana", "Plátano", "Chocolate", "Lechera", "Miel de Maple"];
 
-        // ==========================================
-        // 2. ESTADO GLOBAL Y SINCRONIZACIÓN
-        // ==========================================
         let cart = []; let curItem = null; let editId = null;
         let localOrders = JSON.parse(localStorage.getItem('scrappy_db')) || [];
         let ghUser = localStorage.getItem('gh_user') || ''; let ghRepo = localStorage.getItem('gh_repo') || ''; let ghToken = localStorage.getItem('gh_token') || '';
         let ghSha = null; let isSyncing = false;
 
         // ==========================================
-        // 3. UI DEL MENÚ POS Y TICKET
+        // UI PRINCIPAL
         // ==========================================
         function initUI() {
             const catGrid = document.getElementById('pos-categories');
@@ -202,7 +195,6 @@
             
             document.getElementById('cfg-user').value = ghUser; document.getElementById('cfg-repo').value = ghRepo; document.getElementById('cfg-token').value = ghToken;
             updateViews(); setInterval(updateClocks, 1000);
-            
             if(ghUser && ghRepo && ghToken) { syncWithGitHub(); setInterval(syncWithGitHub, 8000); }
         }
 
@@ -214,14 +206,11 @@
             document.getElementById('pos-items').classList.replace('hidden', 'flex');
         };
 
-        // --- ENVIAR TICKET WHATSAPP ---
+        // --- ENVIAR TICKET WHATSAPP SIN HORA ---
         window.sendTicketWS = (id) => {
             const o = localOrders.find(x => x.id === id);
-            if(!o || !o.phone) return alert("Este pedido no tiene número de teléfono.");
-
-            let msg = `Hola *${o.customer}*, recibimos tu pedido en *Scrappy* 🍔🍟\n\n`;
-            msg += `*Resumen de tu pedido:*\n`;
-            
+            if(!o || !o.phone) return alert("No hay número registrado.");
+            let msg = `Hola *${o.customer}*, recibimos tu pedido en *Scrappy* 🍔🍟\n\n*Resumen de tu pedido:*\n`;
             o.cart.forEach(i => {
                 msg += `🔸 ${i.qty}x ${i.n}\n`;
                 if(i.meat) msg += `   🥩 ${i.meat === 'Mixto' ? 'Mixto ('+i.mixed.join('+')+')' : i.meat}\n`;
@@ -231,19 +220,14 @@
                 if(i.gen) msg += `   ➕ Extras ($10): x${i.gen}\n`;
                 if(i.notes) msg += `   📝 Nota: ${i.notes}\n`;
             });
-            
-            msg += `\n📍 *Dirección:* ${o.address}\n`;
-            msg += `💰 *Total a pagar:* $${o.total}\n\n`;
-            msg += `¡En breve lo preparamos! 🛵💨`;
-
+            msg += `\n📍 *Dirección:* ${o.address}\n💰 *Total a pagar:* $${o.total}\n\n¡En breve lo preparamos! 🛵💨`;
             let phoneStr = o.phone.replace(/\D/g,'');
-            if(phoneStr.length === 10) phoneStr = '52' + phoneStr; // Asume México por default si son 10 dígitos
-
+            if(phoneStr.length === 10) phoneStr = '52' + phoneStr; 
             window.open(`https://wa.me/${phoneStr}?text=${encodeURIComponent(msg)}`, '_blank');
         };
 
         // ==========================================
-        // 4. MODALES Y FUNCIONES
+        // MODALES
         // ==========================================
         window.openM = (it) => {
             curItem = { ...it, base: it.p, qty: 1, removed: [], extras: [], meat: null, mixed: [], sweetOpts: [], gen: 0, notes: "", needsMeat: it.meat, total: it.p };
@@ -259,32 +243,30 @@
 
         function renderVeg() { document.getElementById('veg-grid').innerHTML = VEG.map(v => `<button onclick="togVeg('${v}')" class="px-4 py-2 border-2 border-slate-200 rounded-xl text-xs font-black text-slate-400 active:scale-95 transition-all ${curItem.removed.includes(v) ? 'bg-red-50 border-red-500 text-red-500' : 'bg-white'}">Sin ${v}</button>`).join(''); }
         window.togVeg = (v) => { const idx = curItem.removed.indexOf(v); idx === -1 ? curItem.removed.push(v) : curItem.removed.splice(idx, 1); renderVeg(); };
-        
         function renderExt() { document.getElementById('ext-grid').innerHTML = EXT.map((e, i) => `<button onclick="togExt(${i})" class="px-4 py-2 border-2 border-slate-200 rounded-xl text-xs font-black text-slate-400 active:scale-95 transition-all ${curItem.extras.find(x=>x.n===e.n) ? 'bg-green-50 border-green-500 text-green-600' : 'bg-white'}">+ ${e.n} ($${e.p})</button>`).join(''); }
         window.togExt = (i) => { const e = EXT[i]; const idx = curItem.extras.findIndex(x => x.n === e.n); idx === -1 ? curItem.extras.push(e) : curItem.extras.splice(idx, 1); renderExt(); calcM(); };
-        
         function renderMeat() { document.getElementById('meat-grid').innerHTML = MEATS.map(m => `<label class="cursor-pointer"><input type="radio" name="m" class="hidden btn-meat" ${curItem.meat === m ? 'checked' : ''} onchange="setMeat('${m}')"><div class="border-2 border-slate-200 rounded-2xl p-4 text-center text-xs font-black text-slate-500 transition-all uppercase">${m}</div></label>`).join(''); }
         window.setMeat = (m) => { curItem.meat = m; curItem.base = m === 'Mixto' ? 50 : curItem.p; const mixSec = document.getElementById('m-mixed-opts'); m === 'Mixto' ? (mixSec.classList.remove('hidden'), renderMixed()) : (mixSec.classList.add('hidden'), curItem.mixed=[]); calcM(); };
         function renderMixed() { const opts = ["Pierna", "Jamón", "Pollo"]; document.getElementById('mixed-grid').innerHTML = opts.map(o => `<label class="flex-1 cursor-pointer"><input type="checkbox" class="hidden btn-meat" ${curItem.mixed.includes(o) ? 'checked' : ''} onchange="togMix('${o}')"><div class="border-2 border-orange-200 bg-white rounded-xl p-3 text-center text-[10px] font-black text-orange-600 uppercase transition-all">${o}</div></label>`).join(''); }
         window.togMix = (o) => { const idx = curItem.mixed.indexOf(o); if(idx === -1) { if(curItem.mixed.length >= 2) return alert("Solo 2 carnes!"); curItem.mixed.push(o); } else { curItem.mixed.splice(idx, 1); } renderMixed(); };
         
         function renderSweet() { document.getElementById('sweet-grid').innerHTML = SWEETS.map(s => `<label class="cursor-pointer w-full"><input type="checkbox" class="hidden btn-sweet" ${curItem.sweetOpts.includes(s) ? 'checked' : ''} onchange="togSweet('${s}')"><div class="border-2 border-slate-200 bg-white rounded-2xl p-3 text-center text-xs font-black text-slate-500 uppercase transition-all">${s}</div></label>`).join(''); }
-        window.togSweet = (s) => { const idx = curItem.sweetOpts.indexOf(s); if (idx === -1) { if (curItem.sweetOpts.length >= 3) return alert("Ya elegiste 3 ingredientes. Usa 'Extra $10' para más."); curItem.sweetOpts.push(s); } else { curItem.sweetOpts.splice(idx, 1); } renderSweet(); };
+        window.togSweet = (s) => { const idx = curItem.sweetOpts.indexOf(s); if (idx === -1) { if (curItem.sweetOpts.length >= 3) return alert("Límite de 3 ingredientes superado."); curItem.sweetOpts.push(s); } else { curItem.sweetOpts.splice(idx, 1); } renderSweet(); };
 
         window.changeGenExt = (v) => { if(curItem.gen+v >= 0) curItem.gen += v; document.getElementById('m-gen-val').innerText = curItem.gen; calcM(); };
         window.changeQty = (v) => { if(curItem.qty+v >= 1) curItem.qty += v; document.getElementById('m-qty').innerText = curItem.qty; calcM(); };
         function calcM() { let u = curItem.base; curItem.extras.forEach(x => u += x.p); u += (curItem.gen * 10); curItem.total = u * curItem.qty; document.getElementById('m-price').innerText = curItem.total; }
 
         window.addToCart = () => {
-            if(curItem.needsMeat && !curItem.meat) return alert("Elige la carne para este producto.");
-            if(curItem.meat === 'Mixto' && curItem.mixed.length !== 2) return alert("Elige exactamente 2 carnes pal Mixto.");
-            if(curItem.sweet && curItem.sweetOpts.length === 0) return alert("Selecciona al menos 1 ingrediente.");
+            if(curItem.needsMeat && !curItem.meat) return alert("Falta elegir carne.");
+            if(curItem.meat === 'Mixto' && curItem.mixed.length !== 2) return alert("Debes elegir 2 carnes pal Mixto.");
+            if(curItem.sweet && curItem.sweetOpts.length === 0) return alert("Selecciona mínimo 1 ingrediente.");
             curItem.notes = document.getElementById('m-notes').value.trim();
             cart.push(curItem); renderCart(); closeModal();
         };
 
         // ==========================================
-        // 5. CARRITO Y POS LOCAL
+        // CARRITO Y GUARDADO
         // ==========================================
         function renderCart() {
             const cont = document.getElementById('pos-cart-list'); const totEl = document.getElementById('pos-total');
@@ -334,7 +316,7 @@
         function saveDataLocal() { localOrders = localOrders.filter(o => o.status !== 'f' || (Date.now() - o.updatedAt < 43200000)); localStorage.setItem('scrappy_db', JSON.stringify(localOrders)); }
 
         // ==========================================
-        // 6. MOTOR SMARTSYNC (GITHUB)
+        // GITHUB SYNC
         // ==========================================
         window.openConfig = () => document.getElementById('modal-config').classList.replace('hidden', 'flex');
         window.closeConfig = () => document.getElementById('modal-config').classList.replace('flex', 'hidden');
@@ -367,7 +349,7 @@
         }
 
         // ==========================================
-        // 7. RENDER DE VISTAS (COCINA Y REPARTO)
+        // VISTAS DE COCINA Y REPARTO
         // ==========================================
         function updateViews() {
             localOrders.sort((a, b) => a.created - b.created);
@@ -375,7 +357,6 @@
             const bk = document.getElementById('badge-k'); bk.innerText = p.length; bk.style.display = p.length ? 'block' : 'none';
             const bd = document.getElementById('badge-d'); bd.innerText = r.length; bd.style.display = r.length ? 'block' : 'none';
 
-            // COCINA (Se agregó botón verde de Ticket)
             document.getElementById('kitchen-list').innerHTML = !p.length ? `<div class="text-center text-slate-300 py-20 font-black uppercase tracking-widest">Cocina Limpia</div>` : p.map(o => `
                 <div class="bg-white border-l-8 border-red-500 rounded-3xl p-5 shadow-lg relative">
                     <div class="absolute top-4 right-4 flex gap-2">
@@ -400,7 +381,6 @@
                     <button onclick="upStatus('${o.id}', 'r')" class="w-full bg-red-500 text-white font-black py-5 rounded-2xl shadow-xl uppercase italic tracking-widest active:scale-95 transition-transform">Listo p' Entrega</button>
                 </div>`).join('');
 
-            // REPARTO (Se agregó botón verde de Ticket)
             document.getElementById('delivery-list').innerHTML = !r.length ? `<div class="text-center text-slate-300 py-20 font-black uppercase tracking-widest">Nada p' Repartir</div>` : r.map(o => `
                 <div class="bg-white border-l-8 border-orange-500 rounded-3xl p-5 shadow-lg relative">
                     <div class="absolute top-4 right-4 flex gap-2">
@@ -423,7 +403,18 @@
         }
 
         function updateClocks() { document.querySelectorAll('.clock').forEach(el => { const s = parseInt(el.getAttribute('data-start')); const diff = Math.floor((Date.now() - s) / 1000); const m = Math.floor(diff / 60).toString().padStart(2, '0'); const sc = (diff % 60).toString().padStart(2, '0'); el.innerText = `⏱️ ${m}:${sc}`; if(diff > 900) el.classList.add('timer-alert'); }); }
-        window.switchTab = (t) => { ['pos', 'kitchen', 'delivery'].forEach(n => { document.getElementById('view-'+n).classList.add('hidden'); document.getElementById('btn-'+n).className = "flex-1 py-4 flex flex-col items-center tab-inactive transition-all"; }); document.getElementById('view-'+t).classList.remove('hidden'); document.getElementById('btn-'+t).className = "flex-1 py-4 flex flex-col items-center tab-active transition-all"; };
+        
+        // --- SE CORRIGIÓ LA PÉRDIDA DE ATRIBUTOS (COMO EL RELATIVE DEL BADGE) ---
+        window.switchTab = (t) => { 
+            ['pos', 'kitchen', 'delivery'].forEach(n => { 
+                document.getElementById('view-'+n).classList.add('hidden'); 
+                document.getElementById('btn-'+n).classList.remove('tab-active');
+                document.getElementById('btn-'+n).classList.add('tab-inactive');
+            }); 
+            document.getElementById('view-'+t).classList.remove('hidden'); 
+            document.getElementById('btn-'+t).classList.remove('tab-inactive');
+            document.getElementById('btn-'+t).classList.add('tab-active');
+        };
 
         initUI();
     </script>
