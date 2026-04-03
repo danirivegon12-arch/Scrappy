@@ -18,6 +18,7 @@
         ::-webkit-scrollbar { width: 0px; }
         .btn-meat:checked + div { border-color: #ea580c; background-color: #fff7ed; color: #9a3412; border-width: 2px; }
         .btn-sweet:checked + div { border-color: #ec4899; background-color: #fdf2f8; color: #be185d; border-width: 2px; }
+        .btn-sauce:checked + div { border-color: #ea580c; background-color: #fff7ed; color: #ea580c; border-width: 2px; }
         .timer-alert { color: #ef4444; font-weight: 900; animation: blink 1s infinite; }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
         @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
@@ -46,7 +47,10 @@
         <section id="view-pos" class="p-4 flex flex-col gap-4">
             <div class="bg-white border-2 border-slate-200 rounded-3xl p-4 shadow-sm flex-shrink-0 sticky top-0 z-10">
                 <div class="flex justify-between items-center border-b border-slate-100 pb-2 mb-2">
-                    <span class="font-black text-2xl text-slate-800">TOTAL: $<span id="pos-total" class="text-orange-600">0</span></span>
+                    <div>
+                        <span class="font-black text-2xl text-slate-800">TOTAL: $<span id="pos-total" class="text-orange-600">0</span></span>
+                        <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5"><i class="fa-solid fa-clock text-orange-500"></i> Tiempo est: <span id="pos-eta" class="text-orange-600">0 min</span></div>
+                    </div>
                     <button onclick="resetCart()" class="text-[10px] font-black uppercase text-red-500 bg-red-50 px-3 py-2 rounded-xl active:bg-red-100">Vaciar</button>
                 </div>
                 <div id="pos-cart-list" class="text-sm font-bold text-slate-600 max-h-32 overflow-y-auto space-y-2 pr-2">
@@ -71,9 +75,7 @@
                 <div class="space-y-3 mb-4">
                     <div class="relative">
                         <input type="text" id="cust-name" oninput="handleNameInput(this.value)" autocomplete="off" placeholder="Nombre del cliente *" class="w-full p-4 bg-slate-700 text-white placeholder-slate-400 border border-slate-600 rounded-2xl focus:ring-2 focus:ring-orange-500 outline-none font-bold">
-                        <div id="autocomplete-list" class="absolute z-50 w-full bg-white rounded-xl shadow-2xl border border-slate-200 mt-1 hidden max-h-48 overflow-y-auto">
-                            <!-- Inyectado por JS -->
-                        </div>
+                        <div id="autocomplete-list" class="absolute z-50 w-full bg-white rounded-xl shadow-2xl border border-slate-200 mt-1 hidden max-h-48 overflow-y-auto"></div>
                     </div>
 
                     <input type="text" id="cust-addr" placeholder="Dirección o 'Local' *" class="w-full p-4 bg-slate-700 text-white placeholder-slate-400 border border-slate-600 rounded-2xl focus:ring-2 focus:ring-orange-500 outline-none font-bold">
@@ -106,7 +108,6 @@
                 </div>
             </div>
 
-            <!-- Toggles de Sub-pestañas -->
             <div class="flex gap-2 mb-4 bg-slate-200 p-1 rounded-2xl">
                 <button id="tab-finanzas" onclick="switchControlTab('finanzas')" class="flex-1 bg-white text-slate-800 shadow-sm py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all">Finanzas</button>
                 <button id="tab-historial" onclick="switchControlTab('historial')" class="flex-1 text-slate-500 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all">Historial</button>
@@ -140,9 +141,7 @@
             <div class="text-4xl text-red-500 mb-3"><i class="fa-solid fa-lock"></i></div>
             <h3 class="text-xl font-black text-slate-800 mb-2 uppercase italic tracking-tighter">Eliminar Registro</h3>
             <p class="text-xs text-slate-500 mb-6">Ingresa la contraseña de administrador para borrar permanentemente.</p>
-            
             <input type="password" inputmode="numeric" pattern="[0-9]*" id="del-pass" placeholder="Contraseña" class="w-full p-4 bg-slate-50 border rounded-xl font-black text-2xl text-center text-slate-800 outline-none focus:border-red-500 mb-6 tracking-[0.5em]">
-            
             <div class="flex gap-3">
                 <button onclick="closePasswordModal()" class="flex-1 bg-slate-100 text-slate-500 font-black py-4 rounded-xl uppercase text-xs">Cancelar</button>
                 <button onclick="confirmDelete()" class="flex-1 bg-red-600 text-white font-black py-4 rounded-xl uppercase text-sm shadow-lg active:scale-95 transition-transform">Eliminar</button>
@@ -150,15 +149,13 @@
         </div>
     </div>
 
-    <!-- Modal Contraseña para Acceso a Control -->
+    <!-- Modal Contraseña Control -->
     <div id="modal-auth-control" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm hidden justify-center items-center z-[80] p-4">
         <div class="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl animate-[slideIn_0.2s_ease-out] text-center">
             <div class="text-4xl text-orange-500 mb-3"><i class="fa-solid fa-lock"></i></div>
             <h3 class="text-xl font-black text-slate-800 mb-2 uppercase italic tracking-tighter">Acceso Restringido</h3>
             <p class="text-xs text-slate-500 mb-6">Ingresa la contraseña de administrador para ver las finanzas.</p>
-            
             <input type="password" inputmode="numeric" pattern="[0-9]*" id="auth-pass" placeholder="Contraseña" class="w-full p-4 bg-slate-50 border rounded-xl font-black text-2xl text-center text-slate-800 outline-none focus:border-orange-500 mb-6 tracking-[0.5em]">
-            
             <div class="flex gap-3">
                 <button onclick="closeAuthControl()" class="flex-1 bg-slate-100 text-slate-500 font-black py-4 rounded-xl uppercase text-xs">Cancelar</button>
                 <button onclick="confirmAuthControl()" class="flex-1 bg-orange-600 text-white font-black py-4 rounded-xl uppercase text-sm shadow-lg active:scale-95 transition-transform">Entrar</button>
@@ -214,12 +211,12 @@
         </div>
     </div>
 
-    <!-- Nav Inferior (Se cambió el onclick de Control) -->
+    <!-- Nav Inferior -->
     <nav class="fixed bottom-0 w-full bg-white border-t border-slate-200 flex z-50 shadow-[0_-4px_15px_rgba(0,0,0,0.05)] pb-safe">
         <button onclick="switchTab('pos')" id="btn-pos" class="flex-1 py-3 flex flex-col items-center tab-active transition-all relative"><i class="fa-solid fa-cash-register text-xl mb-1"></i><span class="text-[9px] font-black uppercase tracking-widest">Captura</span></button>
         <button onclick="switchTab('kitchen')" id="btn-kitchen" class="flex-1 py-3 flex flex-col items-center tab-inactive transition-all relative border-l border-slate-100"><i class="fa-solid fa-fire text-xl mb-1"></i><span class="text-[9px] font-black uppercase tracking-widest">Cocina</span><span id="badge-k" class="absolute top-1 right-2 bg-red-500 text-white text-[9px] font-black px-1.5 rounded-full hidden shadow-md">0</span></button>
         <button onclick="switchTab('delivery')" id="btn-delivery" class="flex-1 py-3 flex flex-col items-center tab-inactive transition-all relative border-x border-slate-100"><i class="fa-solid fa-motorcycle text-xl mb-1"></i><span class="text-[9px] font-black uppercase tracking-widest">Reparto</span><span id="badge-d" class="absolute top-1 right-2 bg-orange-500 text-white text-[9px] font-black px-1.5 rounded-full hidden shadow-md">0</span></button>
-        <button onclick="attemptSwitchControl()" id="btn-control" class="flex-1 py-3 flex flex-col items-center tab-inactive transition-all relative"><i class="fa-solid fa-chart-pie text-xl mb-1"></i><span class="text-[9px] font-black uppercase tracking-widest">Control</span></button>
+        <button onclick="switchTab('control')" id="btn-control" class="flex-1 py-3 flex flex-col items-center tab-inactive transition-all relative"><i class="fa-solid fa-chart-pie text-xl mb-1"></i><span class="text-[9px] font-black uppercase tracking-widest">Control</span></button>
     </nav>
 
     <script>
@@ -229,11 +226,11 @@
         const ADMIN_PASS = "58654"; 
 
         const menu = [
-            { cat: "Hamb. Res", icon: "🍔", items: [ { id: 'r1', n: "Scrappy Clasica", p: 60, v: 'burger', e: true }, { id: 'r2', n: "Tocino Crunch", p: 70, v: 'burger', e: true }, { id: 'r3', n: "Double Cheese Chipotle", p: 75, v: 'burger', e: true }, { id: 'r4', n: "Big Scrappy", p: 80, v: 'burger', e: true } ] },
-            { cat: "Hamb. Pollo", icon: "🐔", items: [ { id: 'p1', n: "Simple Chiken", p: 60, v: 'burger', e: true }, { id: 'p2', n: "Big Chiken", p: 70, v: 'burger', e: true } ] },
-            { cat: "Especialidades", icon: "🥪", items: [ { id: 'e1', n: "Lonche", p: 44, v: 'burger', e: true, meat: true }, { id: 'e2', n: "Sandwich", p: 30, v: 'burger', e: true, meat: true }, { id: 'e3', n: "2 Sincronizadas", p: 45, v: 'burger', e: true, meat: true }, { id: 'e4', n: "2 Quesadillas Harina", p: 50, v: false, e: true }, { id: 'b5', n: "Waffles", p: 45, sweet: true }, { id: 'b6', n: "Crepas", p: 40, sweet: true } ] },
-            { cat: "Snacks", icon: "🍟", items: [ { id: 's1', n: "Alitas (Medio Kilo)", p: 100, e: true, hasSauce: true }, { id: 's2', n: "Boneless", p: 99, e: true, hasSauce: true }, { id: 's3', n: "Papas Gajo", p: 45, e: true }, { id: 's4', n: "Papas Gajo Queso", p: 65, e: true }, { id: 's5', n: "Papa Francesa", p: 35, e: true }, { id: 's6', n: "Dedos de Queso", p: 80, e: true }, { id: 's7', n: "Aros Cebolla", p: 60, e: true }, { id: 's8', n: "Hot Dog Sencillo", p: 25, v: 'hotdog', e: true }, { id: 's9', n: "Hot Dog Tocino", p: 32, v: 'hotdog', e: true } ] },
-            { cat: "Bebidas", icon: "🥤", items: [ { id: 'b1', n: "Coca 500ml", p: 24 }, { id: 'b2', n: "Coca 250ml", p: 12 }, { id: 'b3', n: "Malteada", p: 25 }, { id: 'b4', n: "Perla Explosiva", p: 50 } ] }
+            { cat: "Hamb. Res", icon: "🍔", items: [ { id: 'r1', n: "Scrappy Clasica", p: 60, v: 'burger', e: true, time: 5 }, { id: 'r2', n: "Tocino Crunch", p: 70, v: 'burger', e: true, time: 5 }, { id: 'r3', n: "Double Cheese Chipotle", p: 75, v: 'burger', e: true, time: 5 }, { id: 'r4', n: "Big Scrappy", p: 80, v: 'burger', e: true, time: 5 } ] },
+            { cat: "Hamb. Pollo", icon: "🐔", items: [ { id: 'p1', n: "Simple Chiken", p: 60, v: 'burger', e: true, time: 15 }, { id: 'p2', n: "Big Chiken", p: 70, v: 'burger', e: true, time: 15 } ] },
+            { cat: "Especialidades", icon: "🥪", items: [ { id: 'e1', n: "Lonche", p: 44, v: 'burger', e: true, meat: true, time: 5 }, { id: 'e2', n: "Sandwich", p: 30, v: 'burger', e: true, meat: true, time: 5 }, { id: 'e3', n: "2 Sincronizadas", p: 45, v: 'burger', e: true, meat: true, time: 5 }, { id: 'e4', n: "2 Quesadillas Harina", p: 50, v: false, e: true, time: 5 }, { id: 'b5', n: "Waffles", p: 45, sweet: true, time: 12 }, { id: 'b6', n: "Crepas", p: 40, sweet: true, time: 12 } ] },
+            { cat: "Snacks", icon: "🍟", items: [ { id: 's1', n: "Alitas (Medio Kilo)", p: 100, e: true, hasSauce: true, time: 20, fried: true }, { id: 's2', n: "Boneless", p: 99, e: true, hasSauce: true, time: 15, fried: true }, { id: 's3', n: "Papas Gajo", p: 45, e: true, time: 14, fried: true }, { id: 's4', n: "Papas Gajo Queso", p: 65, e: true, time: 14, fried: true }, { id: 's5', n: "Papa Francesa", p: 35, e: true, time: 14, fried: true }, { id: 's6', n: "Dedos de Queso", p: 80, e: true, time: 10, fried: true }, { id: 's7', n: "Aros Cebolla", p: 60, e: true, time: 10, fried: true }, { id: 's8', n: "Hot Dog Sencillo", p: 25, v: 'hotdog', e: true, time: 5 }, { id: 's9', n: "Hot Dog Tocino", p: 32, v: 'hotdog', e: true, time: 5 } ] },
+            { cat: "Bebidas", icon: "🥤", items: [ { id: 'b1', n: "Coca 500ml", p: 24, time: 3 }, { id: 'b2', n: "Coca 250ml", p: 12, time: 3 }, { id: 'b3', n: "Malteada", p: 25, time: 3 }, { id: 'b4', n: "Perla Explosiva", p: 50, time: 3 } ] }
         ];
 
         const VEG_BURGER = ["Jitomate", "Cebolla", "Lechuga", "Jalapeño", "Aguacate", "Catsup", "Mostaza"];
@@ -243,6 +240,9 @@
         const MEATS = ["Pierna", "Jamón", "Pollo", "Mixto"];
         const SWEETS = ["Fresa", "Manzana", "Plátano", "Chocolate", "Lechera", "Miel de Maple"];
 
+        // ==========================================
+        // 2. ESTADO GLOBAL
+        // ==========================================
         let cart = []; let curItem = null; let editId = null; let idToDelete = null;
         let localOrders = JSON.parse(localStorage.getItem('scrappy_db')) || [];
         let localExpenses = JSON.parse(localStorage.getItem('scrappy_exp')) || []; 
@@ -250,6 +250,48 @@
         
         let ghUser = localStorage.getItem('gh_user') || ''; let ghRepo = localStorage.getItem('gh_repo') || ''; let ghToken = localStorage.getItem('gh_token') || '';
         let ghSha = null; let isSyncing = false;
+
+        // ==========================================
+        // ALGORITMO DE TIEMPO (ETA) CORREGIDO
+        // ==========================================
+        function getGlobalETA(newCart = []) {
+            if (!newCart.length && !localOrders.find(o => o.status === 'p')) return 0;
+            
+            const day = new Date().getDay();
+            const baseStaff = (day === 0 || day === 6) ? 3 : 2; 
+            const deliveryCount = localOrders.filter(o => o.status === 'r').length;
+            
+            const availableCooks = Math.max(1, baseStaff - (deliveryCount > 0 ? 1 : 0));
+            
+            let totalFried = 0;
+            let totalGrill = 0;
+            let maxItem = 0;
+            
+            const processItem = (it) => {
+                let t = it.time || 5;
+                if (it.meat === 'Pollo' || (it.mixed && it.mixed.includes('Pollo'))) t = Math.max(t, 15);
+                if (it.fried) totalFried += (t * it.qty);
+                else totalGrill += (t * it.qty);
+                maxItem = Math.max(maxItem, t);
+            };
+            
+            localOrders.filter(o => o.status === 'p').forEach(o => o.cart.forEach(processItem));
+            newCart.forEach(processItem);
+            
+            const baseETA = Math.max(totalFried / 2, totalGrill / availableCooks); 
+            let cookingTime = Math.ceil(Math.max(baseETA, maxItem));
+            
+            let returnTime = 0;
+            if (deliveryCount === 1) returnTime = 8;
+            else if (deliveryCount >= 2) returnTime = 12;
+            
+            // INTELIGENCIA DE TIEMPO: Se solapan los tiempos
+            if (cookingTime >= returnTime) {
+                return cookingTime;
+            } else {
+                return returnTime;
+            }
+        }
 
         // ==========================================
         // 3. UI PRINCIPAL Y WHATSAPP
@@ -333,12 +375,17 @@
         window.changeQty = (v) => { if(curItem.qty+v >= 1) curItem.qty += v; document.getElementById('m-qty').innerText = curItem.qty; calcM(); };
         function calcM() { let u = curItem.base; curItem.extras.forEach(x => u += x.p); u += (curItem.gen * 10); curItem.total = u * curItem.qty; document.getElementById('m-price').innerText = curItem.total; }
 
+        function updatePOS_ETA() {
+            const eta = getGlobalETA(cart);
+            document.getElementById('pos-eta').innerText = eta > 0 ? eta + ' min' : '0 min';
+        }
+
         window.addToCart = () => {
             if(curItem.needsMeat && !curItem.meat) return alert("Falta elegir carne.");
             if(curItem.meat === 'Mixto' && curItem.mixed.length !== 2) return alert("Debes elegir 2 carnes pal Mixto.");
             if(curItem.sweet && curItem.sweetOpts.length === 0) return alert("Selecciona mínimo 1 ingrediente.");
             curItem.notes = document.getElementById('m-notes').value.trim();
-            cart.push(curItem); renderCart(); closeModal();
+            cart.push(curItem); renderCart(); closeModal(); updatePOS_ETA();
         };
 
         // ==========================================
@@ -346,7 +393,7 @@
         // ==========================================
         function renderCart() {
             const cont = document.getElementById('pos-cart-list'); const totEl = document.getElementById('pos-total');
-            if(!cart.length) { cont.innerHTML = `<p class="text-slate-400 italic text-center py-2 font-normal">No hay productos en el pedido.</p>`; totEl.innerText = 0; return; }
+            if(!cart.length) { cont.innerHTML = `<p class="text-slate-400 italic text-center py-2 font-normal">No hay productos en el pedido.</p>`; totEl.innerText = 0; updatePOS_ETA(); return; }
             let t = 0;
             cont.innerHTML = cart.map((it, i) => {
                 const itemTotal = it.total || it.totalLinePrice || 0;  t += itemTotal;
@@ -361,16 +408,17 @@
                 return `<div class="bg-slate-50 border border-slate-100 rounded-xl p-3 flex justify-between items-start"><div class="flex-1 pr-2"><div class="font-black text-slate-800 leading-tight">${it.qty}x ${it.n}</div>${dets.length ? `<div class="text-[10px] uppercase font-bold tracking-tighter mt-1 space-y-0.5 border-l-2 border-slate-200 pl-2">${dets.join('<br>')}</div>` : ''}</div><div class="flex flex-col items-end"><span class="font-black text-orange-600 text-lg">$${itemTotal}</span><button onclick="remCart(${i})" class="text-[10px] text-red-400 font-black uppercase mt-1">Borrar</button></div></div>`;
             }).join('');
             totEl.innerText = t;
+            updatePOS_ETA();
         }
         
         window.remCart = (i) => { cart.splice(i, 1); renderCart(); };
-        window.resetCart = () => { if(confirm("¿Limpiar todo el pedido?")) { cart = []; renderCart(); document.getElementById('cust-name').value = ""; document.getElementById('cust-addr').value = ""; document.getElementById('cust-phone').value = ""; editId = null; document.getElementById('save-text').innerText = "Enviar a Cocina"; } };
+        window.resetCart = () => { if(confirm("¿Limpiar todo el pedido?")) { cart = []; renderCart(); document.getElementById('cust-name').value = ""; document.getElementById('cust-addr').value = ""; document.getElementById('cust-phone').value = ""; editId = null; document.getElementById('save-text').innerText = "Enviar a Cocina"; updatePOS_ETA(); } };
 
         window.saveOrder = () => {
             const n = document.getElementById('cust-name').value.trim(); const a = document.getElementById('cust-addr').value.trim(); const t = document.getElementById('cust-phone').value.trim();
             if(!cart.length || !n || !a) return alert("Faltan datos o productos.");
             const total = cart.reduce((s, i) => s + (i.total || i.totalLinePrice || 0), 0); const now = Date.now();
-            const orderObj = { cart, customer: n, address: a, phone: t, total, updatedAt: now };
+            const orderObj = { cart, customer: n, address: a, phone: t, total, updatedAt: now, eta: getGlobalETA(cart) };
 
             if (editId) {
                 const idx = localOrders.findIndex(o => o.id === editId);
@@ -470,25 +518,15 @@
         // ==========================================
         // 7. LÓGICA DE CONTROL Y SEGURIDAD
         // ==========================================
-        
-        // --- NUEVA LÓGICA DE SEGURIDAD PARA LA PESTAÑA DE CONTROL ---
         window.attemptSwitchControl = () => {
             document.getElementById('auth-pass').value = '';
             document.getElementById('modal-auth-control').classList.replace('hidden', 'flex');
             setTimeout(() => document.getElementById('auth-pass').focus(), 100);
         };
-        
-        window.closeAuthControl = () => {
-            document.getElementById('modal-auth-control').classList.replace('flex', 'hidden');
-        };
-        
+        window.closeAuthControl = () => { document.getElementById('modal-auth-control').classList.replace('flex', 'hidden'); };
         window.confirmAuthControl = () => {
-            if (document.getElementById('auth-pass').value === ADMIN_PASS) {
-                closeAuthControl();
-                actualSwitchTab('control'); // Si es correcta, entra
-            } else {
-                alert("Contraseña incorrecta. Acceso Denegado.");
-            }
+            if (document.getElementById('auth-pass').value === ADMIN_PASS) { closeAuthControl(); actualSwitchTab('control'); } 
+            else { alert("Contraseña incorrecta. Acceso Denegado."); }
         };
 
         window.switchControlTab = (tab) => {
@@ -587,7 +625,7 @@
             document.getElementById('kitchen-list').innerHTML = !p.length ? `<div class="text-center text-slate-300 py-20 font-black uppercase tracking-widest">Cocina Limpia</div>` : p.map(o => `
                 <div class="bg-white border-l-8 border-red-500 rounded-3xl p-5 shadow-lg relative">
                     <div class="absolute top-4 right-4 flex gap-2"><button onclick="cancelOrd('${o.id}')" class="bg-red-50 text-red-500 px-3 py-1.5 rounded-full font-black text-[10px] uppercase shadow-sm border border-red-100"><i class="fa-solid fa-ban"></i></button><button onclick="editOrd('${o.id}')" class="bg-slate-100 text-slate-500 px-3 py-1.5 rounded-full font-black text-[10px] uppercase shadow-sm">Editar</button></div>
-                    <div class="mb-4 pr-32 border-b border-slate-100 pb-3"><h3 class="font-black text-2xl italic uppercase tracking-tighter text-slate-800">${o.customer}</h3><div class="flex items-center gap-2 mt-1"><span class="bg-slate-100 px-2 py-0.5 rounded text-[10px] font-black uppercase text-slate-400">${o.timeStr}</span><span class="clock bg-red-100 text-red-600 px-2 py-0.5 rounded text-[10px] font-black tracking-widest" data-start="${o.created}">⏱️ 00:00</span></div></div>
+                    <div class="mb-4 pr-32 border-b border-slate-100 pb-3"><h3 class="font-black text-2xl italic uppercase tracking-tighter text-slate-800">${o.customer}</h3><div class="flex items-center gap-2 mt-1"><span class="bg-slate-100 px-2 py-0.5 rounded text-[10px] font-black uppercase text-slate-400">${o.timeStr}</span><span class="clock bg-red-100 text-red-600 px-2 py-0.5 rounded text-[10px] font-black tracking-widest" data-start="${o.created}" data-eta="${o.eta || 0}">⏱️ 00:00</span></div></div>
                     <div class="space-y-3 mb-6">
                         ${o.cart.map(i => `<div class="bg-slate-50 p-3 rounded-2xl border border-slate-100"><div class="font-black text-lg text-slate-800 leading-none">${i.qty}x ${i.n}</div>
                             <div class="text-[10px] font-bold text-slate-500 uppercase mt-2 italic space-y-1">
@@ -606,7 +644,7 @@
             document.getElementById('delivery-list').innerHTML = !r.length ? `<div class="text-center text-slate-300 py-20 font-black uppercase tracking-widest">Nada p' Repartir</div>` : r.map(o => `
                 <div class="bg-white border-l-8 border-orange-500 rounded-3xl p-5 shadow-lg relative">
                     <div class="absolute top-4 right-4 flex gap-2"><button onclick="cancelOrd('${o.id}')" class="bg-red-50 text-red-500 px-3 py-1.5 rounded-full font-black text-[10px] uppercase shadow-sm border border-red-100"><i class="fa-solid fa-ban"></i></button>${o.phone ? `<button onclick="sendTicketWS('${o.id}')" class="bg-green-100 text-green-600 px-3 py-1.5 rounded-full font-black text-[10px] uppercase shadow-sm"><i class="fa-brands fa-whatsapp text-sm"></i></button>` : ''}<button onclick="editOrd('${o.id}')" class="bg-slate-100 text-slate-500 px-3 py-1.5 rounded-full font-black text-[10px] uppercase shadow-sm">Editar</button></div>
-                    <div class="flex justify-between items-start mb-4 pr-32 border-b border-slate-100 pb-3"><div><h3 class="font-black text-2xl italic uppercase tracking-tighter text-slate-800">${o.customer}</h3><span class="clock bg-orange-100 text-orange-700 px-2 py-0.5 rounded text-[10px] font-black tracking-widest inline-block mt-1" data-start="${o.created}">⏱️ 00:00</span></div><span class="bg-slate-800 text-white font-black text-2xl px-4 py-2 rounded-2xl italic shadow-md">$${o.total}</span></div>
+                    <div class="flex justify-between items-start mb-4 pr-32 border-b border-slate-100 pb-3"><div><h3 class="font-black text-2xl italic uppercase tracking-tighter text-slate-800">${o.customer}</h3><span class="clock bg-orange-100 text-orange-700 px-2 py-0.5 rounded text-[10px] font-black tracking-widest inline-block mt-1" data-start="${o.created}" data-eta="${o.eta || 0}">⏱️ 00:00</span></div><span class="bg-slate-800 text-white font-black text-2xl px-4 py-2 rounded-2xl italic shadow-md">$${o.total}</span></div>
                     <div class="bg-slate-50 p-4 rounded-2xl mb-4 font-black uppercase italic border border-slate-200"><p class="text-[9px] text-slate-400 mb-1 tracking-widest font-bold">📍 Dirección</p><p class="text-xl leading-tight text-slate-700">${o.address}</p></div>
                     
                     <button onclick="document.getElementById('det-${o.id}').classList.toggle('hidden')" class="w-full bg-white text-slate-500 font-black py-3 rounded-2xl text-[10px] uppercase tracking-widest mb-4 active:scale-95 transition-transform flex justify-center items-center gap-2 border-2 border-slate-100 shadow-sm"><i class="fa-solid fa-list"></i> Ver / Ocultar Pedido</button>
@@ -621,24 +659,16 @@
             renderControl(); updateClocks();
         }
 
-        function updateClocks() { document.querySelectorAll('.clock').forEach(el => { const s = parseInt(el.getAttribute('data-start')); const diff = Math.floor((Date.now() - s) / 1000); const m = Math.floor(diff / 60).toString().padStart(2, '0'); const sc = (diff % 60).toString().padStart(2, '0'); el.innerText = `⏱️ ${m}:${sc}`; if(diff > 900) el.classList.add('timer-alert'); }); }
+        function updateClocks() { document.querySelectorAll('.clock').forEach(el => { const s = parseInt(el.getAttribute('data-start')); const eta = parseInt(el.getAttribute('data-eta')) || 15; const diff = Math.floor((Date.now() - s) / 1000); const h = Math.floor(diff / 3600); const m = Math.floor((diff % 3600) / 60).toString().padStart(2, '0'); const sc = (diff % 60).toString().padStart(2, '0'); el.innerText = h > 0 ? `⏱️ ${h}:${m}:${sc}` : `⏱️ ${m}:${sc}`; if(diff > (eta * 60)) el.classList.add('timer-alert'); }); }
         
         window.switchTab = (t) => { 
-            // NUEVO: Proteger la pestaña "control"
-            if(t === 'control') {
-                attemptSwitchControl();
-                return; // Se detiene aquí, la función confirmAuthControl hará el cambio real
-            }
+            if(t === 'control') { attemptSwitchControl(); return; }
             actualSwitchTab(t);
         };
 
         window.actualSwitchTab = (t) => {
-            ['pos', 'kitchen', 'delivery', 'control'].forEach(n => { 
-                document.getElementById('view-'+n).classList.add('hidden'); 
-                document.getElementById('btn-'+n).classList.remove('tab-active'); document.getElementById('btn-'+n).classList.add('tab-inactive');
-            }); 
-            document.getElementById('view-'+t).classList.remove('hidden'); 
-            document.getElementById('btn-'+t).classList.remove('tab-inactive'); document.getElementById('btn-'+t).classList.add('tab-active');
+            ['pos', 'kitchen', 'delivery', 'control'].forEach(n => { document.getElementById('view-'+n).classList.add('hidden'); document.getElementById('btn-'+n).classList.remove('tab-active'); document.getElementById('btn-'+n).classList.add('tab-inactive'); }); 
+            document.getElementById('view-'+t).classList.remove('hidden'); document.getElementById('btn-'+t).classList.remove('tab-inactive'); document.getElementById('btn-'+t).classList.add('tab-active');
         }
 
         initUI();
