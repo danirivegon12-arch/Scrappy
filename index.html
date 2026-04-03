@@ -12,11 +12,8 @@
         .tab-active { color: #ea580c; border-bottom: 4px solid #ea580c; background-color: #fff7ed; }
         .tab-inactive { color: #94a3b8; }
         ::-webkit-scrollbar { width: 0px; }
-        
-        /* Botones de modificadores */
         .btn-meat:checked + div { border-color: #ea580c; background-color: #fff7ed; color: #9a3412; border-width: 2px; }
         .btn-sweet:checked + div { border-color: #ec4899; background-color: #fdf2f8; color: #be185d; border-width: 2px; }
-        
         .timer-alert { color: #ef4444; font-weight: 900; animation: blink 1s infinite; }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
         @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
@@ -41,9 +38,7 @@
     <!-- Main Content -->
     <main class="flex-1 overflow-y-auto pb-32 relative">
         
-        <!-- ==========================================
-             VISTA 1: CAPTURA (POS)
-             ========================================== -->
+        <!-- VISTA 1: CAPTURA (POS) -->
         <section id="view-pos" class="p-4 flex flex-col gap-4">
             
             <div class="bg-white border-2 border-slate-200 rounded-3xl p-4 shadow-sm flex-shrink-0 sticky top-0 z-10">
@@ -79,9 +74,7 @@
             </div>
         </section>
 
-        <!-- ==========================================
-             VISTA 2 Y 3: COCINA Y REPARTO
-             ========================================== -->
+        <!-- VISTAS COCINA Y REPARTO -->
         <section id="view-kitchen" class="p-4 hidden space-y-4 bg-slate-100 min-h-full">
             <h2 class="text-xl font-black text-slate-800 uppercase italic tracking-tighter"><span class="text-2xl">🍳</span> Pedidos Activos</h2>
             <div id="kitchen-list" class="space-y-4 pb-10"></div>
@@ -99,7 +92,6 @@
         <div class="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl animate-[slideIn_0.2s_ease-out]">
             <h3 class="text-2xl font-black text-slate-800 mb-2"><i class="fa-brands fa-github"></i> Sincronización</h3>
             <p class="text-xs text-slate-500 mb-6">Conecta tu aplicación con tu repositorio de GitHub para que la base de datos se fusione entre celulares.</p>
-            
             <div class="space-y-4 mb-6">
                 <div>
                     <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Usuario de GitHub</label>
@@ -114,7 +106,6 @@
                     <input type="password" id="cfg-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxxx" class="w-full p-3 bg-slate-50 border rounded-xl font-bold text-slate-700 outline-none focus:border-orange-500 text-xs">
                 </div>
             </div>
-            
             <div class="flex gap-3">
                 <button onclick="closeConfig()" class="flex-1 bg-slate-100 text-slate-500 font-black py-4 rounded-xl uppercase text-xs">Cancelar</button>
                 <button onclick="saveConfig()" class="flex-[2] bg-slate-800 text-white font-black py-4 rounded-xl uppercase text-sm shadow-lg">Guardar y Conectar</button>
@@ -122,7 +113,7 @@
         </div>
     </div>
 
-    <!-- Modal Personalización de Producto -->
+    <!-- Modal Personalización -->
     <div id="modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden justify-center items-end z-[60]">
         <div class="bg-white rounded-t-[2.5rem] w-full max-w-lg p-6 pb-10 shadow-2xl overflow-y-auto max-h-[90vh]">
             <div class="flex justify-between items-start border-b border-slate-100 pb-4 mb-4">
@@ -133,7 +124,7 @@
                 <button onclick="closeModal()" class="bg-slate-100 text-slate-400 w-10 h-10 rounded-full font-black text-xl flex items-center justify-center">&times;</button>
             </div>
 
-            <!-- Proteína -->
+            <!-- Modificadores -->
             <div id="m-meat-sec" class="mb-6 hidden">
                 <p class="text-[10px] font-black text-red-500 uppercase tracking-widest mb-3">🥩 Carne Requerida:</p>
                 <div class="grid grid-cols-2 gap-3" id="meat-grid"></div>
@@ -143,19 +134,14 @@
                 </div>
             </div>
 
-            <!-- Ingredientes Postres (Waffles/Crepas) -->
             <div id="m-sweet-sec" class="mb-6 hidden">
                 <p class="text-[10px] font-black text-pink-500 uppercase tracking-widest mb-3">🍓 Ingredientes (Elige hasta 3):</p>
                 <div class="grid grid-cols-2 gap-3" id="sweet-grid"></div>
             </div>
 
-            <!-- Quitar Verduras -->
             <div id="m-veg-sec" class="mb-6 hidden"><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">❌ Quitar:</p><div class="flex flex-wrap gap-2" id="veg-grid"></div></div>
-            
-            <!-- Extras Comida -->
             <div id="m-ext-sec" class="mb-6 hidden"><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">➕ Complementos:</p><div class="flex flex-wrap gap-2" id="ext-grid"></div></div>
 
-            <!-- Extra $10 General -->
             <div class="flex justify-between items-center bg-slate-50 p-4 rounded-2xl mb-6 border border-slate-200">
                 <span class="font-black text-sm uppercase italic text-slate-700">Cualquier Extra ($10)</span>
                 <div class="flex items-center gap-4">
@@ -184,7 +170,7 @@
 
     <script>
         // ==========================================
-        // 1. DATOS DEL MENÚ ACTUALIZADOS
+        // 1. DATOS DEL MENÚ
         // ==========================================
         const menu = [
             { cat: "Hamb. Res", icon: "🍔", items: [ { id: 'r1', n: "Scrappy Clasica", p: 60, v: true, e: true }, { id: 'r2', n: "Tocino Crunch", p: 70, v: true, e: true }, { id: 'r3', n: "Double Cheese Chipotle", p: 75, v: true, e: true }, { id: 'r4', n: "Big Scrappy", p: 80, v: true, e: true } ] },
@@ -197,11 +183,10 @@
         const VEG = ["Jitomate", "Cebolla", "Lechuga", "Jalapeño", "Aguacate"];
         const EXT = [{ n: "Papas Francesa", p: 18 }, { n: "Aros Cebolla", p: 10 }, { n: "Aderezo Extra", p: 10 }, { n: "Salchicha Frita", p: 10 }];
         const MEATS = ["Pierna", "Jamón", "Pollo", "Mixto"];
-        // NUEVO: Opciones para Postres
         const SWEETS = ["Fresa", "Manzana", "Plátano", "Chocolate", "Lechera", "Miel de Maple"];
 
         // ==========================================
-        // 2. ESTADO GLOBAL
+        // 2. ESTADO GLOBAL Y SINCRONIZACIÓN
         // ==========================================
         let cart = []; let curItem = null; let editId = null;
         let localOrders = JSON.parse(localStorage.getItem('scrappy_db')) || [];
@@ -209,7 +194,7 @@
         let ghSha = null; let isSyncing = false;
 
         // ==========================================
-        // 3. UI DEL MENÚ POS
+        // 3. UI DEL MENÚ POS Y TICKET
         // ==========================================
         function initUI() {
             const catGrid = document.getElementById('pos-categories');
@@ -229,28 +214,49 @@
             document.getElementById('pos-items').classList.replace('hidden', 'flex');
         };
 
+        // --- ENVIAR TICKET WHATSAPP ---
+        window.sendTicketWS = (id) => {
+            const o = localOrders.find(x => x.id === id);
+            if(!o || !o.phone) return alert("Este pedido no tiene número de teléfono.");
+
+            let msg = `Hola *${o.customer}*, recibimos tu pedido en *Scrappy* 🍔🍟\n\n`;
+            msg += `*Resumen de tu pedido:*\n`;
+            
+            o.cart.forEach(i => {
+                msg += `🔸 ${i.qty}x ${i.n}\n`;
+                if(i.meat) msg += `   🥩 ${i.meat === 'Mixto' ? 'Mixto ('+i.mixed.join('+')+')' : i.meat}\n`;
+                if(i.sweetOpts && i.sweetOpts.length) msg += `   🍓 ${i.sweetOpts.join(', ')}\n`;
+                if(i.removed && i.removed.length) msg += `   ❌ Sin: ${i.removed.join(', ')}\n`;
+                if(i.extras && i.extras.length) msg += `   ➕ Con: ${i.extras.map(x=>x.n).join(', ')}\n`;
+                if(i.gen) msg += `   ➕ Extras ($10): x${i.gen}\n`;
+                if(i.notes) msg += `   📝 Nota: ${i.notes}\n`;
+            });
+            
+            msg += `\n📍 *Dirección:* ${o.address}\n`;
+            msg += `💰 *Total a pagar:* $${o.total}\n\n`;
+            msg += `¡En breve lo preparamos! 🛵💨`;
+
+            let phoneStr = o.phone.replace(/\D/g,'');
+            if(phoneStr.length === 10) phoneStr = '52' + phoneStr; // Asume México por default si son 10 dígitos
+
+            window.open(`https://wa.me/${phoneStr}?text=${encodeURIComponent(msg)}`, '_blank');
+        };
+
         // ==========================================
-        // 4. LÓGICA DEL MODAL Y POSTRES
+        // 4. MODALES Y FUNCIONES
         // ==========================================
         window.openM = (it) => {
-            // Se agrega sweetOpts al estado del item actual
             curItem = { ...it, base: it.p, qty: 1, removed: [], extras: [], meat: null, mixed: [], sweetOpts: [], gen: 0, notes: "", needsMeat: it.meat, total: it.p };
             document.getElementById('m-name').innerText = it.n; document.getElementById('m-qty').innerText = 1; document.getElementById('m-gen-val').innerText = 0; document.getElementById('m-notes').value = "";
-            
             const vSec = document.getElementById('m-veg-sec'); it.v ? (vSec.classList.remove('hidden'), renderVeg()) : vSec.classList.add('hidden');
             const eSec = document.getElementById('m-ext-sec'); it.e ? (eSec.classList.remove('hidden'), renderExt()) : eSec.classList.add('hidden');
             const mSec = document.getElementById('m-meat-sec'); it.meat ? (mSec.classList.remove('hidden'), renderMeat()) : mSec.classList.add('hidden');
-            
-            // Sección de Postres
-            const swSec = document.getElementById('m-sweet-sec');
-            if (it.sweet) { swSec.classList.remove('hidden'); renderSweet(); } else { swSec.classList.add('hidden'); }
-            
+            const swSec = document.getElementById('m-sweet-sec'); if (it.sweet) { swSec.classList.remove('hidden'); renderSweet(); } else { swSec.classList.add('hidden'); }
             calcM(); document.getElementById('modal').classList.replace('hidden', 'flex');
         };
 
         window.closeModal = () => document.getElementById('modal').classList.replace('flex', 'hidden');
 
-        // Renderizadores de modificadores
         function renderVeg() { document.getElementById('veg-grid').innerHTML = VEG.map(v => `<button onclick="togVeg('${v}')" class="px-4 py-2 border-2 border-slate-200 rounded-xl text-xs font-black text-slate-400 active:scale-95 transition-all ${curItem.removed.includes(v) ? 'bg-red-50 border-red-500 text-red-500' : 'bg-white'}">Sin ${v}</button>`).join(''); }
         window.togVeg = (v) => { const idx = curItem.removed.indexOf(v); idx === -1 ? curItem.removed.push(v) : curItem.removed.splice(idx, 1); renderVeg(); };
         
@@ -262,35 +268,17 @@
         function renderMixed() { const opts = ["Pierna", "Jamón", "Pollo"]; document.getElementById('mixed-grid').innerHTML = opts.map(o => `<label class="flex-1 cursor-pointer"><input type="checkbox" class="hidden btn-meat" ${curItem.mixed.includes(o) ? 'checked' : ''} onchange="togMix('${o}')"><div class="border-2 border-orange-200 bg-white rounded-xl p-3 text-center text-[10px] font-black text-orange-600 uppercase transition-all">${o}</div></label>`).join(''); }
         window.togMix = (o) => { const idx = curItem.mixed.indexOf(o); if(idx === -1) { if(curItem.mixed.length >= 2) return alert("Solo 2 carnes!"); curItem.mixed.push(o); } else { curItem.mixed.splice(idx, 1); } renderMixed(); };
         
-        // NUEVO: Renderizador de Postres
-        function renderSweet() {
-            document.getElementById('sweet-grid').innerHTML = SWEETS.map(s => `
-                <label class="cursor-pointer w-full">
-                    <input type="checkbox" class="hidden btn-sweet" ${curItem.sweetOpts.includes(s) ? 'checked' : ''} onchange="togSweet('${s}')">
-                    <div class="border-2 border-slate-200 bg-white rounded-2xl p-3 text-center text-xs font-black text-slate-500 uppercase transition-all">${s}</div>
-                </label>`).join('');
-        }
-        window.togSweet = (s) => {
-            const idx = curItem.sweetOpts.indexOf(s);
-            if (idx === -1) {
-                if (curItem.sweetOpts.length >= 3) return alert("Ya elegiste 3 ingredientes. Si quieres más, usa el botón de Extra ($10) abajo.");
-                curItem.sweetOpts.push(s);
-            } else {
-                curItem.sweetOpts.splice(idx, 1);
-            }
-            renderSweet();
-        };
+        function renderSweet() { document.getElementById('sweet-grid').innerHTML = SWEETS.map(s => `<label class="cursor-pointer w-full"><input type="checkbox" class="hidden btn-sweet" ${curItem.sweetOpts.includes(s) ? 'checked' : ''} onchange="togSweet('${s}')"><div class="border-2 border-slate-200 bg-white rounded-2xl p-3 text-center text-xs font-black text-slate-500 uppercase transition-all">${s}</div></label>`).join(''); }
+        window.togSweet = (s) => { const idx = curItem.sweetOpts.indexOf(s); if (idx === -1) { if (curItem.sweetOpts.length >= 3) return alert("Ya elegiste 3 ingredientes. Usa 'Extra $10' para más."); curItem.sweetOpts.push(s); } else { curItem.sweetOpts.splice(idx, 1); } renderSweet(); };
 
         window.changeGenExt = (v) => { if(curItem.gen+v >= 0) curItem.gen += v; document.getElementById('m-gen-val').innerText = curItem.gen; calcM(); };
         window.changeQty = (v) => { if(curItem.qty+v >= 1) curItem.qty += v; document.getElementById('m-qty').innerText = curItem.qty; calcM(); };
-        
         function calcM() { let u = curItem.base; curItem.extras.forEach(x => u += x.p); u += (curItem.gen * 10); curItem.total = u * curItem.qty; document.getElementById('m-price').innerText = curItem.total; }
 
         window.addToCart = () => {
             if(curItem.needsMeat && !curItem.meat) return alert("Elige la carne para este producto.");
             if(curItem.meat === 'Mixto' && curItem.mixed.length !== 2) return alert("Elige exactamente 2 carnes pal Mixto.");
-            if(curItem.sweet && curItem.sweetOpts.length === 0) return alert("Selecciona al menos 1 ingrediente para tu postre.");
-            
+            if(curItem.sweet && curItem.sweetOpts.length === 0) return alert("Selecciona al menos 1 ingrediente.");
             curItem.notes = document.getElementById('m-notes').value.trim();
             cart.push(curItem); renderCart(); closeModal();
         };
@@ -311,7 +299,6 @@
                 if(it.extras && it.extras.length) dets.push(`<span class="text-green-600">➕ ${it.extras.map(x=>x.n).join(', ')}</span>`);
                 if(it.gen) dets.push(`<span class="text-purple-600">➕ Extra $10 x${it.gen}</span>`);
                 if(it.notes) dets.push(`<span class="text-blue-500">Nota: ${it.notes}</span>`);
-                
                 return `<div class="bg-slate-50 border border-slate-100 rounded-xl p-3 flex justify-between items-start"><div class="flex-1 pr-2"><div class="font-black text-slate-800 leading-tight">${it.qty}x ${it.n}</div>${dets.length ? `<div class="text-[10px] uppercase font-bold tracking-tighter mt-1 space-y-0.5 border-l-2 border-slate-200 pl-2">${dets.join('<br>')}</div>` : ''}</div><div class="flex flex-col items-end"><span class="font-black text-orange-600 text-lg">$${itemTotal}</span><button onclick="remCart(${i})" class="text-[10px] text-red-400 font-black uppercase mt-1">Borrar</button></div></div>`;
             }).join('');
             totEl.innerText = t;
@@ -344,11 +331,10 @@
         };
 
         window.upStatus = (id, s) => { const idx = localOrders.findIndex(x => x.id === id); if(idx > -1) { localOrders[idx].status = s; localOrders[idx].updatedAt = Date.now(); saveDataLocal(); updateViews(); syncWithGitHub(); } };
-
         function saveDataLocal() { localOrders = localOrders.filter(o => o.status !== 'f' || (Date.now() - o.updatedAt < 43200000)); localStorage.setItem('scrappy_db', JSON.stringify(localOrders)); }
 
         // ==========================================
-        // 6. MOTOR SMARTSYNC (GITHUB REST API)
+        // 6. MOTOR SMARTSYNC (GITHUB)
         // ==========================================
         window.openConfig = () => document.getElementById('modal-config').classList.replace('hidden', 'flex');
         window.closeConfig = () => document.getElementById('modal-config').classList.replace('flex', 'hidden');
@@ -389,10 +375,14 @@
             const bk = document.getElementById('badge-k'); bk.innerText = p.length; bk.style.display = p.length ? 'block' : 'none';
             const bd = document.getElementById('badge-d'); bd.innerText = r.length; bd.style.display = r.length ? 'block' : 'none';
 
+            // COCINA (Se agregó botón verde de Ticket)
             document.getElementById('kitchen-list').innerHTML = !p.length ? `<div class="text-center text-slate-300 py-20 font-black uppercase tracking-widest">Cocina Limpia</div>` : p.map(o => `
                 <div class="bg-white border-l-8 border-red-500 rounded-3xl p-5 shadow-lg relative">
-                    <button onclick="editOrd('${o.id}')" class="absolute top-4 right-4 bg-slate-100 text-slate-500 px-3 py-1.5 rounded-full font-black text-[10px] uppercase">Editar</button>
-                    <div class="mb-4 pr-16 border-b border-slate-100 pb-3">
+                    <div class="absolute top-4 right-4 flex gap-2">
+                        ${o.phone ? `<button onclick="sendTicketWS('${o.id}')" class="bg-green-100 text-green-600 px-3 py-1.5 rounded-full font-black text-[10px] uppercase shadow-sm"><i class="fa-brands fa-whatsapp text-sm"></i> Ticket</button>` : ''}
+                        <button onclick="editOrd('${o.id}')" class="bg-slate-100 text-slate-500 px-3 py-1.5 rounded-full font-black text-[10px] uppercase shadow-sm">Editar</button>
+                    </div>
+                    <div class="mb-4 pr-32 border-b border-slate-100 pb-3">
                         <h3 class="font-black text-2xl italic uppercase tracking-tighter text-slate-800">${o.customer}</h3>
                         <div class="flex items-center gap-2 mt-1"><span class="bg-slate-100 px-2 py-0.5 rounded text-[10px] font-black uppercase text-slate-400">${o.timeStr}</span><span class="clock bg-red-100 text-red-600 px-2 py-0.5 rounded text-[10px] font-black tracking-widest" data-start="${o.created}">⏱️ 00:00</span></div>
                     </div>
@@ -403,17 +393,21 @@
                                 ${i.sweetOpts && i.sweetOpts.length ? `<p class="text-pink-600">🍓 ING: ${i.sweetOpts.join(', ')}</p>` : ''}
                                 ${i.removed && i.removed.length ? `<p class="text-red-500">❌ Sin: ${i.removed.join(', ')}</p>` : ''}
                                 ${i.extras && i.extras.length ? `<p class="text-green-600">➕ Con: ${i.extras.map(x=>x.n).join(', ')}</p>` : ''}
-                                ${i.gen ? `<p class="text-purple-600">➕ Extra $10: x${i.gen}</p>` : ''}
+                                ${i.gen ? `<p class="text-purple-600">➕ Extras Gen: x${i.gen}</p>` : ''}
                                 ${i.notes ? `<p class="text-blue-500 underline">Nota: ${i.notes}</p>` : ''}
                             </div></div>`).join('')}
                     </div>
                     <button onclick="upStatus('${o.id}', 'r')" class="w-full bg-red-500 text-white font-black py-5 rounded-2xl shadow-xl uppercase italic tracking-widest active:scale-95 transition-transform">Listo p' Entrega</button>
                 </div>`).join('');
 
+            // REPARTO (Se agregó botón verde de Ticket)
             document.getElementById('delivery-list').innerHTML = !r.length ? `<div class="text-center text-slate-300 py-20 font-black uppercase tracking-widest">Nada p' Repartir</div>` : r.map(o => `
                 <div class="bg-white border-l-8 border-orange-500 rounded-3xl p-5 shadow-lg relative">
-                    <button onclick="editOrd('${o.id}')" class="absolute top-4 right-4 bg-slate-100 text-slate-500 px-3 py-1.5 rounded-full font-black text-[10px] uppercase">Editar</button>
-                    <div class="flex justify-between items-start mb-4 pr-16 border-b border-slate-100 pb-3">
+                    <div class="absolute top-4 right-4 flex gap-2">
+                        ${o.phone ? `<button onclick="sendTicketWS('${o.id}')" class="bg-green-100 text-green-600 px-3 py-1.5 rounded-full font-black text-[10px] uppercase shadow-sm"><i class="fa-brands fa-whatsapp text-sm"></i> Ticket</button>` : ''}
+                        <button onclick="editOrd('${o.id}')" class="bg-slate-100 text-slate-500 px-3 py-1.5 rounded-full font-black text-[10px] uppercase shadow-sm">Editar</button>
+                    </div>
+                    <div class="flex justify-between items-start mb-4 pr-32 border-b border-slate-100 pb-3">
                         <div><h3 class="font-black text-2xl italic uppercase tracking-tighter text-slate-800">${o.customer}</h3><span class="clock bg-orange-100 text-orange-700 px-2 py-0.5 rounded text-[10px] font-black tracking-widest inline-block mt-1" data-start="${o.created}">⏱️ 00:00</span></div>
                         <span class="bg-slate-800 text-white font-black text-2xl px-4 py-2 rounded-2xl italic shadow-md">$${o.total}</span>
                     </div>
