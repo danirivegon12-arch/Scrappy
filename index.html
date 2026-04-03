@@ -21,7 +21,7 @@
 </head>
 <body class="flex flex-col h-screen overflow-hidden text-slate-800">
 
-    <!-- Header con botón de Ajustes GitHub -->
+    <!-- Header -->
     <header class="bg-orange-600 text-white p-4 shadow-md flex justify-between items-center z-40">
         <h1 class="text-3xl font-black italic tracking-tighter">SCRAPPY</h1>
         <div class="flex items-center gap-2">
@@ -34,15 +34,15 @@
         </div>
     </header>
 
-    <!-- Main Content (Ajustado el pb-36 para que no estorbe la barra de abajo) -->
-    <main class="flex-1 overflow-y-auto pb-36 relative">
+    <!-- Main Content (Ahora con scroll natural) -->
+    <main class="flex-1 overflow-y-auto pb-32 relative">
         
         <!-- ==========================================
              VISTA 1: CAPTURA (POS)
              ========================================== -->
         <section id="view-pos" class="p-4 flex flex-col gap-4">
             
-            <div class="bg-white border-2 border-slate-200 rounded-3xl p-4 shadow-sm flex-shrink-0">
+            <div class="bg-white border-2 border-slate-200 rounded-3xl p-4 shadow-sm flex-shrink-0 sticky top-0 z-10">
                 <div class="flex justify-between items-center border-b border-slate-100 pb-2 mb-2">
                     <span class="font-black text-2xl text-slate-800">TOTAL: $<span id="pos-total" class="text-orange-600">0</span></span>
                     <button onclick="resetCart()" class="text-[10px] font-black uppercase text-red-500 bg-red-50 px-3 py-2 rounded-xl active:bg-red-100">Vaciar</button>
@@ -52,18 +52,19 @@
                 </div>
             </div>
 
-            <div class="bg-white rounded-3xl p-4 shadow-sm border border-slate-200 flex-1 flex flex-col min-h-[250px]">
-                <div id="pos-categories" class="grid grid-cols-2 gap-3 h-full content-start"></div>
-                <div id="pos-items" class="hidden flex-col h-full">
+            <div class="bg-white rounded-3xl p-4 shadow-sm border border-slate-200">
+                <div id="pos-categories" class="grid grid-cols-2 gap-3 content-start"></div>
+                <div id="pos-items" class="hidden flex-col">
                     <button onclick="showCategories()" class="self-start mb-4 text-orange-600 font-black uppercase text-sm flex items-center gap-2 bg-orange-50 px-4 py-2 rounded-xl active:bg-orange-100">
                         <i class="fa-solid fa-chevron-left"></i> Volver a Menú
                     </button>
-                    <h3 id="current-cat-title" class="font-black text-xl italic text-slate-400 uppercase mb-3 px-1">Categoría</h3>
-                    <div id="pos-items-grid" class="grid grid-cols-2 gap-3 overflow-y-auto pb-2 slide-in"></div>
+                    <h3 id="current-cat-title" class="font-black text-xl italic text-slate-300 uppercase mb-3 px-1">Categoría</h3>
+                    <div id="pos-items-grid" class="grid grid-cols-2 gap-3 slide-in"></div>
                 </div>
             </div>
 
-            <div class="bg-slate-800 rounded-3xl p-5 shadow-lg flex-shrink-0">
+            <!-- Botón de enviar ahora fluirá hacia abajo -->
+            <div class="bg-slate-800 rounded-3xl p-5 shadow-lg flex-shrink-0 mt-2 mb-6">
                 <div class="space-y-3 mb-4">
                     <input type="text" id="cust-name" placeholder="Nombre del cliente *" class="w-full p-4 bg-slate-700 text-white placeholder-slate-400 border border-slate-600 rounded-2xl focus:ring-2 focus:ring-orange-500 outline-none font-bold">
                     <input type="text" id="cust-addr" placeholder="Dirección o 'Local' *" class="w-full p-4 bg-slate-700 text-white placeholder-slate-400 border border-slate-600 rounded-2xl focus:ring-2 focus:ring-orange-500 outline-none font-bold">
@@ -169,14 +170,14 @@
 
     <script>
         // ==========================================
-        // 1. DATOS DEL MENÚ
+        // 1. DATOS DEL MENÚ (Ajustados con Waffles y Crepas)
         // ==========================================
         const menu = [
             { cat: "Hamb. Res", icon: "🍔", items: [ { id: 'r1', n: "Scrappy Clasica", p: 60, v: true, e: true }, { id: 'r2', n: "Tocino Crunch", p: 70, v: true, e: true }, { id: 'r3', n: "Double Cheese Chipotle", p: 75, v: true, e: true }, { id: 'r4', n: "Big Scrappy", p: 80, v: true, e: true } ] },
             { cat: "Hamb. Pollo", icon: "🐔", items: [ { id: 'p1', n: "Simple Chiken", p: 60, v: true, e: true }, { id: 'p2', n: "Big Chiken", p: 70, v: true, e: true } ] },
-            { cat: "Especialidades", icon: "🥪", items: [ { id: 'e1', n: "Lonche", p: 44, v: true, e: true, meat: true }, { id: 'e2', n: "Sandwich", p: 30, v: true, e: true, meat: true }, { id: 'e3', n: "2 Sincronizadas", p: 45, v: true, e: true, meat: true }, { id: 'e4', n: "2 Quesadillas Harina", p: 50, v: false, e: true } ] },
+            { cat: "Especialidades", icon: "🥪", items: [ { id: 'e1', n: "Lonche", p: 44, v: true, e: true, meat: true }, { id: 'e2', n: "Sandwich", p: 30, v: true, e: true, meat: true }, { id: 'e3', n: "2 Sincronizadas", p: 45, v: true, e: true, meat: true }, { id: 'e4', n: "2 Quesadillas Harina", p: 50, v: false, e: true }, { id: 'b5', n: "Waffles", p: 45 }, { id: 'b6', n: "Crepas", p: 40 } ] },
             { cat: "Snacks", icon: "🍟", items: [ { id: 's1', n: "Alitas (Medio Kilo)", p: 100 }, { id: 's2', n: "Boneless", p: 99 }, { id: 's3', n: "Papas Gajo", p: 45 }, { id: 's4', n: "Papas Gajo Queso", p: 65 }, { id: 's5', n: "Papa Francesa", p: 35 }, { id: 's6', n: "Dedos de Queso", p: 80 }, { id: 's7', n: "Aros Cebolla", p: 60 }, { id: 's8', n: "Hot Dog Sencillo", p: 25, v: true, e: true }, { id: 's9', n: "Hot Dog Tocino", p: 32, v: true, e: true } ] },
-            { cat: "Bebidas", icon: "🥤", items: [ { id: 'b1', n: "Coca 500ml", p: 24 }, { id: 'b2', n: "Coca 250ml", p: 12 }, { id: 'b3', n: "Malteada", p: 25 }, { id: 'b4', n: "Perla Explosiva", p: 50 }, { id: 'b5', n: "Waffles", p: 45 }, { id: 'b6', n: "Crepas", p: 40 } ] }
+            { cat: "Bebidas", icon: "🥤", items: [ { id: 'b1', n: "Coca 500ml", p: 24 }, { id: 'b2', n: "Coca 250ml", p: 12 }, { id: 'b3', n: "Malteada", p: 25 }, { id: 'b4', n: "Perla Explosiva", p: 50 } ] }
         ];
 
         const VEG = ["Jitomate", "Cebolla", "Lechuga", "Jalapeño", "Aguacate"];
@@ -225,10 +226,9 @@
         };
 
         // ==========================================
-        // 4. LÓGICA DEL MODAL (CORREGIDA)
+        // 4. LÓGICA DEL MODAL (CORREGIDA PARA PRECIOS NaN)
         // ==========================================
         window.openM = (it) => {
-            // CORRECCIÓN 1: Se agrega needsMeat y se inicializa total en el producto
             curItem = { ...it, base: it.p, qty: 1, removed: [], extras: [], meat: null, mixed: [], gen: 0, notes: "", needsMeat: it.meat, total: it.p };
             document.getElementById('m-name').innerText = it.n; 
             document.getElementById('m-qty').innerText = 1; 
@@ -239,8 +239,7 @@
             const eSec = document.getElementById('m-ext-sec'); it.e ? (eSec.classList.remove('hidden'), renderExt()) : eSec.classList.add('hidden');
             const mSec = document.getElementById('m-meat-sec'); it.meat ? (mSec.classList.remove('hidden'), renderMeat()) : mSec.classList.add('hidden');
             
-            // CORRECCIÓN 2: Ejecutar calcM() para que curItem.total se calcule desde que se abre
-            calcM();
+            calcM(); // Inicializa el cálculo para evitar el NaN al instante
             document.getElementById('modal').classList.replace('hidden', 'flex');
         };
 
@@ -265,7 +264,6 @@
         }
 
         window.addToCart = () => {
-            // CORRECCIÓN 3: La validación de carne usa needsMeat
             if(curItem.needsMeat && !curItem.meat) return alert("Elige la carne para este producto.");
             if(curItem.meat === 'Mixto' && curItem.mixed.length !== 2) return alert("Elige exactamente 2 carnes pal Mixto.");
             curItem.notes = document.getElementById('m-notes').value.trim();
@@ -273,7 +271,7 @@
         };
 
         // ==========================================
-        // 5. CARRITO Y POS LOCAL
+        // 5. CARRITO Y POS LOCAL (Con Retrocompatibilidad)
         // ==========================================
         function renderCart() {
             const cont = document.getElementById('pos-cart-list');
@@ -281,14 +279,18 @@
             if(!cart.length) { cont.innerHTML = `<p class="text-slate-400 italic text-center py-2 font-normal">No hay productos en el pedido.</p>`; totEl.innerText = 0; return; }
             let t = 0;
             cont.innerHTML = cart.map((it, i) => {
-                t += it.total;
+                // Compatibilidad con pedidos viejos del localStorage
+                const itemTotal = it.total || it.totalLinePrice || 0; 
+                t += itemTotal;
+                
                 let dets = [];
                 if(it.meat) dets.push(`<span class="text-orange-700">🥩 ${it.meat === 'Mixto' ? 'Mixto ('+it.mixed.join('+')+')' : it.meat}</span>`);
-                if(it.removed.length) dets.push(`<span class="text-red-500">❌ Sin: ${it.removed.join(', ')}</span>`);
-                if(it.extras.length) dets.push(`<span class="text-green-600">➕ ${it.extras.map(x=>x.n).join(', ')}</span>`);
+                if(it.removed && it.removed.length) dets.push(`<span class="text-red-500">❌ Sin: ${it.removed.join(', ')}</span>`);
+                if(it.extras && it.extras.length) dets.push(`<span class="text-green-600">➕ ${it.extras.map(x=>x.n).join(', ')}</span>`);
                 if(it.gen) dets.push(`<span class="text-purple-600">➕ Extra $10 x${it.gen}</span>`);
                 if(it.notes) dets.push(`<span class="text-blue-500">Nota: ${it.notes}</span>`);
-                return `<div class="bg-slate-50 border border-slate-100 rounded-xl p-3 flex justify-between items-start"><div class="flex-1 pr-2"><div class="font-black text-slate-800 leading-tight">${it.qty}x ${it.n}</div>${dets.length ? `<div class="text-[10px] uppercase font-bold tracking-tighter mt-1 space-y-0.5 border-l-2 border-slate-200 pl-2">${dets.join('<br>')}</div>` : ''}</div><div class="flex flex-col items-end"><span class="font-black text-orange-600 text-lg">$${it.total}</span><button onclick="remCart(${i})" class="text-[10px] text-red-400 font-black uppercase mt-1">Borrar</button></div></div>`;
+                
+                return `<div class="bg-slate-50 border border-slate-100 rounded-xl p-3 flex justify-between items-start"><div class="flex-1 pr-2"><div class="font-black text-slate-800 leading-tight">${it.qty}x ${it.n}</div>${dets.length ? `<div class="text-[10px] uppercase font-bold tracking-tighter mt-1 space-y-0.5 border-l-2 border-slate-200 pl-2">${dets.join('<br>')}</div>` : ''}</div><div class="flex flex-col items-end"><span class="font-black text-orange-600 text-lg">$${itemTotal}</span><button onclick="remCart(${i})" class="text-[10px] text-red-400 font-black uppercase mt-1">Borrar</button></div></div>`;
             }).join('');
             totEl.innerText = t;
         }
@@ -302,7 +304,8 @@
             const t = document.getElementById('cust-phone').value.trim();
             if(!cart.length || !n || !a) return alert("Faltan datos o productos.");
             
-            const total = cart.reduce((s, i) => s + i.total, 0);
+            // Compatibilidad con pedidos viejos al sumar
+            const total = cart.reduce((s, i) => s + (i.total || i.totalLinePrice || 0), 0);
             const now = Date.now();
             const orderObj = { cart, customer: n, address: a, phone: t, total, updatedAt: now };
 
@@ -330,7 +333,9 @@
 
         window.editOrd = (id) => {
             const o = localOrders.find(x => x.id === id); if(!o) return;
-            editId = o.id; cart = [...o.cart];
+            editId = o.id; 
+            // Arreglar estructura de carritos muy viejos al editar
+            cart = o.cart.map(item => ({...item, total: item.total || item.totalLinePrice || 0}));
             document.getElementById('cust-name').value = o.customer; document.getElementById('cust-addr').value = o.address; document.getElementById('cust-phone').value = o.phone || "";
             document.getElementById('save-text').innerText = "Guardar Cambios"; renderCart(); switchTab('pos');
         };
@@ -441,8 +446,8 @@
                             <div class="font-black text-lg text-slate-800 leading-none">${i.qty}x ${i.n}</div>
                             <div class="text-[10px] font-bold text-slate-500 uppercase mt-2 italic space-y-1">
                                 ${i.meat ? `<p class="text-orange-700">🥩 ${i.meat === 'Mixto' ? 'Mixto ('+i.mixed.join('+')+')' : i.meat}</p>` : ''}
-                                ${i.removed.length ? `<p class="text-red-500">❌ Sin: ${i.removed.join(', ')}</p>` : ''}
-                                ${i.extras.length ? `<p class="text-green-600">➕ Con: ${i.extras.map(x=>x.n).join(', ')}</p>` : ''}
+                                ${i.removed && i.removed.length ? `<p class="text-red-500">❌ Sin: ${i.removed.join(', ')}</p>` : ''}
+                                ${i.extras && i.extras.length ? `<p class="text-green-600">➕ Con: ${i.extras.map(x=>x.n).join(', ')}</p>` : ''}
                                 ${i.gen ? `<p class="text-purple-600">➕ Extras Gen: x${i.gen}</p>` : ''}
                                 ${i.notes ? `<p class="text-blue-500 underline">Nota: ${i.notes}</p>` : ''}
                             </div>
