@@ -38,9 +38,7 @@
     <!-- Main Content -->
     <main class="flex-1 overflow-y-auto pb-36 relative">
         
-        <!-- ==========================================
-             VISTA 1: CAPTURA (POS)
-             ========================================== -->
+        <!-- VISTA 1: CAPTURA (POS) -->
         <section id="view-pos" class="p-4 flex flex-col gap-4">
             <div class="bg-white border-2 border-slate-200 rounded-3xl p-4 shadow-sm flex-shrink-0 sticky top-0 z-10">
                 <div class="flex justify-between items-center border-b border-slate-100 pb-2 mb-2">
@@ -75,25 +73,19 @@
             </div>
         </section>
 
-        <!-- ==========================================
-             VISTA 2: COCINA
-             ========================================== -->
+        <!-- VISTA 2: COCINA -->
         <section id="view-kitchen" class="p-4 hidden space-y-4 bg-slate-100 min-h-full">
             <h2 class="text-xl font-black text-slate-800 uppercase italic tracking-tighter"><span class="text-2xl">🍳</span> Pedidos Activos</h2>
             <div id="kitchen-list" class="space-y-4 pb-10"></div>
         </section>
 
-        <!-- ==========================================
-             VISTA 3: REPARTO
-             ========================================== -->
+        <!-- VISTA 3: REPARTO -->
         <section id="view-delivery" class="p-4 hidden space-y-4 bg-slate-100 min-h-full">
             <h2 class="text-xl font-black text-slate-800 uppercase italic tracking-tighter"><span class="text-2xl">🛵</span> Listos p' Reparto</h2>
             <div id="delivery-list" class="space-y-4 pb-10"></div>
         </section>
 
-        <!-- ==========================================
-             VISTA 4: CONTROL (FINANZAS)
-             ========================================== -->
+        <!-- VISTA 4: CONTROL (FINANZAS) -->
         <section id="view-control" class="p-4 hidden space-y-4 bg-slate-100 min-h-full">
             <div class="flex justify-between items-center mb-2">
                 <h2 class="text-xl font-black text-slate-800 uppercase italic tracking-tighter"><span class="text-2xl">📊</span> Finanzas</h2>
@@ -101,7 +93,7 @@
             </div>
             
             <div id="control-dashboard" class="space-y-4 pb-10">
-                <!-- Tarjetas Inyectadas por JS -->
+                <!-- Inyectadas por JS -->
             </div>
         </section>
 
@@ -186,9 +178,9 @@
         </div>
     </div>
 
-    <!-- Nav Inferior (Ahora con 4 botones) -->
+    <!-- Nav Inferior -->
     <nav class="fixed bottom-0 w-full bg-white border-t border-slate-200 flex z-50 shadow-[0_-4px_15px_rgba(0,0,0,0.05)] pb-safe">
-        <button onclick="switchTab('pos')" id="btn-pos" class="flex-1 py-3 flex flex-col items-center tab-active transition-all relative"><i class="fa-solid fa-cash-register text-xl mb-1"></i><span class="text-[9px] font-black uppercase tracking-widest">POS</span></button>
+        <button onclick="switchTab('pos')" id="btn-pos" class="flex-1 py-3 flex flex-col items-center tab-active transition-all relative"><i class="fa-solid fa-cash-register text-xl mb-1"></i><span class="text-[9px] font-black uppercase tracking-widest">Captura</span></button>
         <button onclick="switchTab('kitchen')" id="btn-kitchen" class="flex-1 py-3 flex flex-col items-center tab-inactive transition-all relative border-l border-slate-100"><i class="fa-solid fa-fire text-xl mb-1"></i><span class="text-[9px] font-black uppercase tracking-widest">Cocina</span><span id="badge-k" class="absolute top-1 right-2 bg-red-500 text-white text-[9px] font-black px-1.5 rounded-full hidden shadow-md">0</span></button>
         <button onclick="switchTab('delivery')" id="btn-delivery" class="flex-1 py-3 flex flex-col items-center tab-inactive transition-all relative border-x border-slate-100"><i class="fa-solid fa-motorcycle text-xl mb-1"></i><span class="text-[9px] font-black uppercase tracking-widest">Reparto</span><span id="badge-d" class="absolute top-1 right-2 bg-orange-500 text-white text-[9px] font-black px-1.5 rounded-full hidden shadow-md">0</span></button>
         <button onclick="switchTab('control')" id="btn-control" class="flex-1 py-3 flex flex-col items-center tab-inactive transition-all relative"><i class="fa-solid fa-chart-pie text-xl mb-1"></i><span class="text-[9px] font-black uppercase tracking-widest">Control</span></button>
@@ -196,7 +188,7 @@
 
     <script>
         // ==========================================
-        // 1. DATOS DEL MENÚ
+        // DATOS DEL MENÚ
         // ==========================================
         const menu = [
             { cat: "Hamb. Res", icon: "🍔", items: [ { id: 'r1', n: "Scrappy Clasica", p: 60, v: true, e: true }, { id: 'r2', n: "Tocino Crunch", p: 70, v: true, e: true }, { id: 'r3', n: "Double Cheese Chipotle", p: 75, v: true, e: true }, { id: 'r4', n: "Big Scrappy", p: 80, v: true, e: true } ] },
@@ -212,17 +204,17 @@
         const SWEETS = ["Fresa", "Manzana", "Plátano", "Chocolate", "Lechera", "Miel de Maple"];
 
         // ==========================================
-        // 2. ESTADO GLOBAL
+        // ESTADO GLOBAL
         // ==========================================
         let cart = []; let curItem = null; let editId = null;
         let localOrders = JSON.parse(localStorage.getItem('scrappy_db')) || [];
-        let localExpenses = JSON.parse(localStorage.getItem('scrappy_exp')) || []; // NUEVO: Gastos
+        let localExpenses = JSON.parse(localStorage.getItem('scrappy_exp')) || []; 
         
         let ghUser = localStorage.getItem('gh_user') || ''; let ghRepo = localStorage.getItem('gh_repo') || ''; let ghToken = localStorage.getItem('gh_token') || '';
         let ghSha = null; let isSyncing = false;
 
         // ==========================================
-        // 3. UI DEL MENÚ POS Y TICKET
+        // UI PRINCIPAL
         // ==========================================
         function initUI() {
             const catGrid = document.getElementById('pos-categories');
@@ -348,18 +340,15 @@
         window.upStatus = (id, s) => { const idx = localOrders.findIndex(x => x.id === id); if(idx > -1) { localOrders[idx].status = s; localOrders[idx].updatedAt = Date.now(); saveDataLocal(); updateViews(); syncWithGitHub(); } };
         
         function saveDataLocal() { 
-            // NUEVO: Guardar hasta 35 días para que el reporte Mensual funcione bien
             const limite = 35 * 24 * 60 * 60 * 1000;
             localOrders = localOrders.filter(o => o.status !== 'f' || (Date.now() - o.updatedAt < limite)); 
             localStorage.setItem('scrappy_db', JSON.stringify(localOrders)); 
-            
-            // Gastos
             localExpenses = localExpenses.filter(e => (Date.now() - e.updatedAt < limite));
             localStorage.setItem('scrappy_exp', JSON.stringify(localExpenses));
         }
 
         // ==========================================
-        // GITHUB SYNC (AHORA SINCRONIZA OBJETO COMPLETO)
+        // GITHUB SYNC
         // ==========================================
         window.openConfig = () => document.getElementById('modal-config').classList.replace('hidden', 'flex');
         window.closeConfig = () => document.getElementById('modal-config').classList.replace('flex', 'hidden');
@@ -382,17 +371,13 @@
                     const fileData = await res.json(); ghSha = fileData.sha; 
                     const decoded = b64DecodeUnicode(fileData.content.replace(/\n/g, '')); 
                     const parsed = JSON.parse(decoded); 
-                    // Compatibilidad con archivos viejos (si era un array simple)
-                    if(Array.isArray(parsed)) { cloudData.orders = parsed; needUpload = true; } 
-                    else { cloudData = parsed; }
+                    if(Array.isArray(parsed)) { cloudData.orders = parsed; needUpload = true; } else { cloudData = parsed; }
                 } else if (res.status === 404) { needUpload = true; } else { throw new Error("Token Inválido"); }
 
-                // FUSIONAR ÓRDENES
                 let mergedOrd = new Map(); cloudData.orders.forEach(o => mergedOrd.set(o.id, o));
                 localOrders.forEach(loc => { if (mergedOrd.has(loc.id)) { let cld = mergedOrd.get(loc.id); if (loc.updatedAt > cld.updatedAt) { mergedOrd.set(loc.id, loc); needUpload = true; } } else { mergedOrd.set(loc.id, loc); needUpload = true; } });
                 localOrders = Array.from(mergedOrd.values()); 
 
-                // FUSIONAR GASTOS
                 let mergedExp = new Map(); (cloudData.expenses || []).forEach(e => mergedExp.set(e.id, e));
                 localExpenses.forEach(loc => { if (mergedExp.has(loc.id)) { let cld = mergedExp.get(loc.id); if (loc.updatedAt > cld.updatedAt) { mergedExp.set(loc.id, loc); needUpload = true; } } else { mergedExp.set(loc.id, loc); needUpload = true; } });
                 localExpenses = Array.from(mergedExp.values()); 
@@ -402,7 +387,7 @@
                 if (needUpload) {
                     uiStatus.innerHTML = `<i class="fa-solid fa-cloud-arrow-up mr-1"></i> Subiendo...`; uiStatus.classList.replace('bg-green-600', 'bg-orange-600');
                     const content = b64EncodeUnicode(JSON.stringify({ orders: localOrders, expenses: localExpenses })); 
-                    const body = { message: "SmartSync Data Update", content: content }; if (ghSha) body.sha = ghSha;
+                    const body = { message: "SmartSync Update", content: content }; if (ghSha) body.sha = ghSha;
                     const putRes = await fetch(url, { method: 'PUT', headers, body: JSON.stringify(body) }); if (putRes.ok) { const putData = await putRes.json(); ghSha = putData.content.sha; }
                 }
                 uiStatus.innerHTML = `<i class="fa-solid fa-check-double mr-1"></i> Nube Ok`; uiStatus.classList.replace('bg-orange-800', 'bg-green-600'); uiStatus.classList.replace('bg-red-600', 'bg-green-600'); uiStatus.classList.replace('bg-orange-600', 'bg-green-600');
@@ -411,7 +396,7 @@
         }
 
         // ==========================================
-        // LÓGICA DE CONTROL Y FINANZAS
+        // LÓGICA DE CONTROL (SAB-VIE Y FECHAS EN GASTOS)
         // ==========================================
         window.openExpense = () => { document.getElementById('exp-amount').value = ''; document.getElementById('exp-desc').value = ''; document.getElementById('modal-expense').classList.replace('hidden', 'flex'); };
         window.closeExpense = () => { document.getElementById('modal-expense').classList.replace('flex', 'hidden'); };
@@ -421,15 +406,31 @@
             const desc = document.getElementById('exp-desc').value.trim() || 'Gasto General';
             if (isNaN(amt) || amt <= 0) return alert("Ingresa un monto válido");
 
-            localExpenses.push({ id: 'exp_' + Date.now() + '_' + Math.floor(Math.random()*100), amount: amt, desc: desc, date: Date.now(), updatedAt: Date.now() });
+            localExpenses.push({ id: 'exp_' + Date.now() + '_' + Math.floor(Math.random()*100), amount: amt, desc: desc, date: Date.now(), timeStr: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}), updatedAt: Date.now() });
             saveDataLocal(); closeExpense(); updateViews(); syncWithGitHub();
         };
+
+        function getStartOfCustomWeek(dateObj) {
+            // Logica: La semana empieza el Sabado (día 6).
+            // getDay() devuelve 0 (Dom) a 6 (Sab).
+            const d = new Date(dateObj);
+            const day = d.getDay();
+            // Si hoy es Sabado (6), restar 0 días. Si es Domingo (0), restar 1. Si es Lunes (1), restar 2... 
+            // La fórmula es: si day == 6 -> diff = 0. si day < 6 -> diff = day + 1
+            const diff = (day === 6) ? 0 : (day + 1);
+            d.setDate(d.getDate() - diff);
+            d.setHours(0, 0, 0, 0);
+            return d.getTime();
+        }
 
         function calculateFinances() {
             const now = new Date();
             const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-            const dayOfWeek = now.getDay() || 7; 
-            const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - dayOfWeek + 1).getTime();
+            
+            // Inicio de semana (Sábado)
+            const startOfWeek = getStartOfCustomWeek(now);
+            
+            // Inicio de mes
             const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
 
             let s = { d: 0, w: 0, m: 0 };
@@ -455,67 +456,58 @@
         function renderControl() {
             const fin = calculateFinances();
             
-            // Bloque de Hoy (Con lista de gastos recientes)
+            // Bloque de Hoy (Con lista de gastos recientes y su hora)
             const recentExp = localExpenses.filter(e => e.date >= new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()).getTime());
-            const expListHTML = recentExp.map((e, idx) => `<div class="flex justify-between text-[10px] text-slate-500 border-t border-slate-100 pt-1 mt-1"><span>${e.desc}</span><span class="text-red-500 font-bold">-$${e.amount}</span></div>`).join('');
+            const expListHTML = recentExp.map(e => `
+                <div class="flex justify-between items-center text-[10px] text-slate-500 border-t border-slate-100 pt-2 mt-2">
+                    <div class="flex flex-col">
+                        <span class="font-bold text-slate-700">${e.desc}</span>
+                        <span class="text-[9px] text-slate-400"><i class="fa-regular fa-clock"></i> ${e.timeStr || ''}</span>
+                    </div>
+                    <span class="text-red-500 font-black text-sm">-$${e.amount}</span>
+                </div>
+            `).join('');
 
             document.getElementById('control-dashboard').innerHTML = `
                 <!-- HOY -->
-                <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-200">
-                    <h3 class="font-black text-slate-400 uppercase tracking-widest text-xs mb-3">Resumen de Hoy</h3>
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="font-bold text-slate-600 text-sm">Ventas Entregadas</span>
-                        <span class="font-black text-green-600 text-lg">+$${fin.s.d}</span>
+                <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-200 relative overflow-hidden">
+                    <div class="absolute -right-4 -top-4 text-6xl text-slate-50 opacity-50"><i class="fa-solid fa-calendar-day"></i></div>
+                    <h3 class="font-black text-slate-400 uppercase tracking-widest text-xs mb-3 relative z-10">Resumen de Hoy</h3>
+                    <div class="flex justify-between items-center mb-2 relative z-10">
+                        <span class="font-bold text-slate-600 text-sm">Ventas Entregadas</span><span class="font-black text-green-600 text-lg">+$${fin.s.d}</span>
                     </div>
-                    <div class="flex justify-between items-center mb-3">
-                        <span class="font-bold text-slate-600 text-sm">Gastos del Día</span>
-                        <span class="font-black text-red-500 text-lg">-$${fin.e.d}</span>
+                    <div class="flex justify-between items-center mb-1 relative z-10">
+                        <span class="font-bold text-slate-600 text-sm">Gastos del Día</span><span class="font-black text-red-500 text-lg">-$${fin.e.d}</span>
                     </div>
-                    ${expListHTML}
-                    <div class="mt-4 pt-4 border-t border-slate-100 flex justify-between items-center">
+                    <div class="relative z-10 mb-4">${expListHTML}</div>
+                    <div class="mt-4 pt-4 border-t border-slate-100 flex justify-between items-center relative z-10">
                         <span class="font-black text-slate-800 uppercase tracking-tighter">Ganancia Neta</span>
                         <span class="font-black text-3xl ${fin.s.d - fin.e.d >= 0 ? 'text-slate-800' : 'text-red-600'}">$${fin.s.d - fin.e.d}</span>
                     </div>
                 </div>
 
                 <!-- SEMANA -->
-                <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-200">
-                    <h3 class="font-black text-slate-400 uppercase tracking-widest text-xs mb-3">Esta Semana (Lun-Dom)</h3>
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="font-bold text-slate-600 text-sm">Ventas Totales</span>
-                        <span class="font-black text-green-600 text-lg">+$${fin.s.w}</span>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <span class="font-bold text-slate-600 text-sm">Gastos Totales</span>
-                        <span class="font-black text-red-500 text-lg">-$${fin.e.w}</span>
-                    </div>
-                    <div class="mt-4 pt-4 border-t border-slate-100 flex justify-between items-center">
-                        <span class="font-black text-slate-800 uppercase tracking-tighter">Neta Semanal</span>
-                        <span class="font-black text-2xl ${fin.s.w - fin.e.w >= 0 ? 'text-slate-800' : 'text-red-600'}">$${fin.s.w - fin.e.w}</span>
-                    </div>
+                <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-200 relative overflow-hidden">
+                    <div class="absolute -right-4 -top-4 text-6xl text-slate-50 opacity-50"><i class="fa-solid fa-calendar-week"></i></div>
+                    <h3 class="font-black text-slate-400 uppercase tracking-widest text-xs mb-3 relative z-10">Esta Semana (Sáb - Vie)</h3>
+                    <div class="flex justify-between items-center mb-2 relative z-10"><span class="font-bold text-slate-600 text-sm">Ventas Totales</span><span class="font-black text-green-600 text-lg">+$${fin.s.w}</span></div>
+                    <div class="flex justify-between items-center relative z-10"><span class="font-bold text-slate-600 text-sm">Gastos Totales</span><span class="font-black text-red-500 text-lg">-$${fin.e.w}</span></div>
+                    <div class="mt-4 pt-4 border-t border-slate-100 flex justify-between items-center relative z-10"><span class="font-black text-slate-800 uppercase tracking-tighter">Neta Semanal</span><span class="font-black text-2xl ${fin.s.w - fin.e.w >= 0 ? 'text-slate-800' : 'text-red-600'}">$${fin.s.w - fin.e.w}</span></div>
                 </div>
 
                 <!-- MES -->
-                <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-200">
-                    <h3 class="font-black text-slate-400 uppercase tracking-widest text-xs mb-3">Este Mes</h3>
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="font-bold text-slate-600 text-sm">Ventas Totales</span>
-                        <span class="font-black text-green-600 text-lg">+$${fin.s.m}</span>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <span class="font-bold text-slate-600 text-sm">Gastos Totales</span>
-                        <span class="font-black text-red-500 text-lg">-$${fin.e.m}</span>
-                    </div>
-                    <div class="mt-4 pt-4 border-t border-slate-100 flex justify-between items-center">
-                        <span class="font-black text-slate-800 uppercase tracking-tighter">Neta Mensual</span>
-                        <span class="font-black text-2xl ${fin.s.m - fin.e.m >= 0 ? 'text-slate-800' : 'text-red-600'}">$${fin.s.m - fin.e.m}</span>
-                    </div>
+                <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-200 relative overflow-hidden">
+                    <div class="absolute -right-4 -top-4 text-6xl text-slate-50 opacity-50"><i class="fa-solid fa-calendar-days"></i></div>
+                    <h3 class="font-black text-slate-400 uppercase tracking-widest text-xs mb-3 relative z-10">Este Mes</h3>
+                    <div class="flex justify-between items-center mb-2 relative z-10"><span class="font-bold text-slate-600 text-sm">Ventas Totales</span><span class="font-black text-green-600 text-lg">+$${fin.s.m}</span></div>
+                    <div class="flex justify-between items-center relative z-10"><span class="font-bold text-slate-600 text-sm">Gastos Totales</span><span class="font-black text-red-500 text-lg">-$${fin.e.m}</span></div>
+                    <div class="mt-4 pt-4 border-t border-slate-100 flex justify-between items-center relative z-10"><span class="font-black text-slate-800 uppercase tracking-tighter">Neta Mensual</span><span class="font-black text-2xl ${fin.s.m - fin.e.m >= 0 ? 'text-slate-800' : 'text-red-600'}">$${fin.s.m - fin.e.m}</span></div>
                 </div>
             `;
         }
 
         // ==========================================
-        // RENDER DE VISTAS (COCINA Y REPARTO)
+        // VISTAS DE COCINA Y REPARTO
         // ==========================================
         function updateViews() {
             localOrders.sort((a, b) => a.created - b.created);
@@ -526,8 +518,11 @@
             // COCINA
             document.getElementById('kitchen-list').innerHTML = !p.length ? `<div class="text-center text-slate-300 py-20 font-black uppercase tracking-widest">Cocina Limpia</div>` : p.map(o => `
                 <div class="bg-white border-l-8 border-red-500 rounded-3xl p-5 shadow-lg relative">
-                    <button onclick="editOrd('${o.id}')" class="absolute top-4 right-4 bg-slate-100 text-slate-500 px-3 py-1.5 rounded-full font-black text-[10px] uppercase">Editar</button>
-                    <div class="mb-4 pr-16 border-b border-slate-100 pb-3">
+                    <div class="absolute top-4 right-4 flex gap-2">
+                        ${o.phone ? `<button onclick="sendTicketWS('${o.id}')" class="bg-green-100 text-green-600 px-3 py-1.5 rounded-full font-black text-[10px] uppercase shadow-sm"><i class="fa-brands fa-whatsapp text-sm"></i> Ticket</button>` : ''}
+                        <button onclick="editOrd('${o.id}')" class="bg-slate-100 text-slate-500 px-3 py-1.5 rounded-full font-black text-[10px] uppercase shadow-sm">Editar</button>
+                    </div>
+                    <div class="mb-4 pr-32 border-b border-slate-100 pb-3">
                         <h3 class="font-black text-2xl italic uppercase tracking-tighter text-slate-800">${o.customer}</h3>
                         <div class="flex items-center gap-2 mt-1"><span class="bg-slate-100 px-2 py-0.5 rounded text-[10px] font-black uppercase text-slate-400">${o.timeStr}</span><span class="clock bg-red-100 text-red-600 px-2 py-0.5 rounded text-[10px] font-black tracking-widest" data-start="${o.created}">⏱️ 00:00</span></div>
                     </div>
