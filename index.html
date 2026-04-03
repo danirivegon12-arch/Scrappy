@@ -84,7 +84,7 @@
             <div id="delivery-list" class="space-y-4 pb-10"></div>
         </section>
 
-        <!-- VISTA CONTROL -->
+        <!-- VISTA CONTROL Y FINANZAS -->
         <section id="view-control" class="p-4 hidden bg-slate-100 min-h-full">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-xl font-black text-slate-800 uppercase italic tracking-tighter"><span class="text-2xl">📊</span> Control</h2>
@@ -119,15 +119,13 @@
         </div>
     </div>
 
-    <!-- Modal Contraseña -->
+    <!-- Modal Contraseña para Borrar -->
     <div id="modal-password" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm hidden justify-center items-center z-[80] p-4">
         <div class="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl animate-[slideIn_0.2s_ease-out] text-center">
             <div class="text-4xl text-red-500 mb-3"><i class="fa-solid fa-lock"></i></div>
             <h3 class="text-xl font-black text-slate-800 mb-2 uppercase italic tracking-tighter">Eliminar Pedido</h3>
             <p class="text-xs text-slate-500 mb-6">Ingresa la contraseña de administrador para borrar el registro permanentemente.</p>
-            
             <input type="password" id="del-pass" placeholder="Contraseña" class="w-full p-4 bg-slate-50 border rounded-xl font-black text-xl text-center text-slate-800 outline-none focus:border-red-500 mb-6 tracking-[0.5em]">
-            
             <div class="flex gap-3">
                 <button onclick="closePasswordModal()" class="flex-1 bg-slate-100 text-slate-500 font-black py-4 rounded-xl uppercase text-xs">Cancelar</button>
                 <button onclick="confirmDelete()" class="flex-1 bg-red-600 text-white font-black py-4 rounded-xl uppercase text-sm shadow-lg active:scale-95 transition-transform">Eliminar</button>
@@ -193,9 +191,9 @@
 
     <script>
         // ==========================================
-        // 1. CONFIGURACIÓN Y DATOS
+        // 1. CONFIGURACIÓN Y DATOS DE MENÚ
         // ==========================================
-        const ADMIN_PASS = "1234"; // CONTRASEÑA PARA BORRAR PEDIDOS
+        const ADMIN_PASS = "1234"; // <-- CAMBIA ESTA CONTRASEÑA SI GUSTAS
 
         const menu = [
             { cat: "Hamb. Res", icon: "🍔", items: [ { id: 'r1', n: "Scrappy Clasica", p: 60, v: 'burger', e: true }, { id: 'r2', n: "Tocino Crunch", p: 70, v: 'burger', e: true }, { id: 'r3', n: "Double Cheese Chipotle", p: 75, v: 'burger', e: true }, { id: 'r4', n: "Big Scrappy", p: 80, v: 'burger', e: true } ] },
@@ -222,7 +220,7 @@
         let ghSha = null; let isSyncing = false;
 
         // ==========================================
-        // 3. UI PRINCIPAL
+        // 3. UI PRINCIPAL Y WHATSAPP
         // ==========================================
         function initUI() {
             const catGrid = document.getElementById('pos-categories');
@@ -259,7 +257,7 @@
         };
 
         // ==========================================
-        // MODALES POS
+        // 4. MODALES POS Y LÓGICA DE PERSONALIZACIÓN
         // ==========================================
         window.openM = (it) => {
             curItem = { ...it, base: it.p, qty: 1, removed: [], extras: [], meat: null, mixed: [], sweetOpts: [], selSauces: [], gen: 0, notes: "", needsMeat: it.meat, total: it.p };
@@ -273,19 +271,25 @@
         };
 
         window.closeModal = () => document.getElementById('modal').classList.replace('flex', 'hidden');
+
         function getVegList() { return curItem.v === 'hotdog' ? VEG_HOTDOG : VEG_BURGER; }
         function renderVeg() { const list = getVegList(); document.getElementById('veg-grid').innerHTML = list.map(v => `<button onclick="togVeg('${v}')" class="px-4 py-2 border-2 border-slate-200 rounded-xl text-xs font-black text-slate-400 active:scale-95 transition-all ${curItem.removed.includes(v) ? 'bg-red-50 border-red-500 text-red-500' : 'bg-white'}">Sin ${v}</button>`).join(''); }
         window.togVeg = (v) => { const idx = curItem.removed.indexOf(v); idx === -1 ? curItem.removed.push(v) : curItem.removed.splice(idx, 1); renderVeg(); };
+        
         function renderExt() { document.getElementById('ext-grid').innerHTML = EXT.map((e, i) => `<button onclick="togExt(${i})" class="px-4 py-2 border-2 border-slate-200 rounded-xl text-xs font-black text-slate-400 active:scale-95 transition-all ${curItem.extras.find(x=>x.n===e.n) ? 'bg-green-50 border-green-500 text-green-600' : 'bg-white'}">+ ${e.n} ($${e.p})</button>`).join(''); }
         window.togExt = (i) => { const e = EXT[i]; const idx = curItem.extras.findIndex(x => x.n === e.n); idx === -1 ? curItem.extras.push(e) : curItem.extras.splice(idx, 1); renderExt(); calcM(); };
+        
         function renderMeat() { document.getElementById('meat-grid').innerHTML = MEATS.map(m => `<label class="cursor-pointer"><input type="radio" name="m" class="hidden btn-meat" ${curItem.meat === m ? 'checked' : ''} onchange="setMeat('${m}')"><div class="border-2 border-slate-200 rounded-2xl p-4 text-center text-xs font-black text-slate-500 transition-all uppercase">${m}</div></label>`).join(''); }
         window.setMeat = (m) => { curItem.meat = m; curItem.base = m === 'Mixto' ? 50 : curItem.p; const mixSec = document.getElementById('m-mixed-opts'); m === 'Mixto' ? (mixSec.classList.remove('hidden'), renderMixed()) : (mixSec.classList.add('hidden'), curItem.mixed=[]); calcM(); };
         function renderMixed() { const opts = ["Pierna", "Jamón", "Pollo"]; document.getElementById('mixed-grid').innerHTML = opts.map(o => `<label class="flex-1 cursor-pointer"><input type="checkbox" class="hidden btn-meat" ${curItem.mixed.includes(o) ? 'checked' : ''} onchange="togMix('${o}')"><div class="border-2 border-orange-200 bg-white rounded-xl p-3 text-center text-[10px] font-black text-orange-600 uppercase transition-all">${o}</div></label>`).join(''); }
         window.togMix = (o) => { const idx = curItem.mixed.indexOf(o); if(idx === -1) { if(curItem.mixed.length >= 2) return alert("Solo 2 carnes!"); curItem.mixed.push(o); } else { curItem.mixed.splice(idx, 1); } renderMixed(); };
+        
         function renderSweet() { document.getElementById('sweet-grid').innerHTML = SWEETS.map(s => `<label class="cursor-pointer w-full"><input type="checkbox" class="hidden btn-sweet" ${curItem.sweetOpts.includes(s) ? 'checked' : ''} onchange="togSweet('${s}')"><div class="border-2 border-slate-200 bg-white rounded-2xl p-3 text-center text-xs font-black text-slate-500 uppercase transition-all">${s}</div></label>`).join(''); }
-        window.togSweet = (s) => { const idx = curItem.sweetOpts.indexOf(s); if (idx === -1) { if (curItem.sweetOpts.length >= 3) return alert("Límite superado."); curItem.sweetOpts.push(s); } else { curItem.sweetOpts.splice(idx, 1); } renderSweet(); };
+        window.togSweet = (s) => { const idx = curItem.sweetOpts.indexOf(s); if (idx === -1) { if (curItem.sweetOpts.length >= 3) return alert("Límite de 3 ingredientes superado."); curItem.sweetOpts.push(s); } else { curItem.sweetOpts.splice(idx, 1); } renderSweet(); };
+
         function renderSauces() { document.getElementById('sauce-grid').innerHTML = SAUCES.map(s => `<label class="cursor-pointer w-full"><input type="checkbox" class="hidden btn-sauce" ${curItem.selSauces.includes(s) ? 'checked' : ''} onchange="togSauce('${s}')"><div class="border-2 border-slate-200 bg-white rounded-2xl p-3 text-center text-xs font-black text-slate-500 uppercase transition-all">${s}</div></label>`).join(''); }
         window.togSauce = (s) => { const idx = curItem.selSauces.indexOf(s); if (idx === -1) { if (curItem.selSauces.length >= 2) return alert(`Máximo 2 aderezos.`); curItem.selSauces.push(s); } else { curItem.selSauces.splice(idx, 1); } renderSauces(); };
+
         window.changeGenExt = (v) => { if(curItem.gen+v >= 0) curItem.gen += v; document.getElementById('m-gen-val').innerText = curItem.gen; calcM(); };
         window.changeQty = (v) => { if(curItem.qty+v >= 1) curItem.qty += v; document.getElementById('m-qty').innerText = curItem.qty; calcM(); };
         function calcM() { let u = curItem.base; curItem.extras.forEach(x => u += x.p); u += (curItem.gen * 10); curItem.total = u * curItem.qty; document.getElementById('m-price').innerText = curItem.total; }
@@ -299,7 +303,7 @@
         };
 
         // ==========================================
-        // CARRITO Y GUARDADO
+        // 5. CARRITO Y GUARDADO
         // ==========================================
         function renderCart() {
             const cont = document.getElementById('pos-cart-list'); const totEl = document.getElementById('pos-total');
@@ -347,11 +351,27 @@
         };
 
         window.upStatus = (id, s) => { const idx = localOrders.findIndex(x => x.id === id); if(idx > -1) { localOrders[idx].status = s; localOrders[idx].updatedAt = Date.now(); saveDataLocal(); updateViews(); syncWithGitHub(); } };
+        
+        // --- AQUÍ APLICAMOS EL SOFT DELETE (BORRADO LÓGICO) PARA QUE GITHUB NO LO RESUCITE ---
         window.cancelOrd = (id) => { if(confirm("¿Seguro que deseas CANCELAR este pedido?")) { upStatus(id, 'c'); } };
+        window.askDel = (id) => { idToDelete = id; document.getElementById('del-pass').value = ''; document.getElementById('modal-password').classList.replace('hidden', 'flex'); };
+        window.closePasswordModal = () => { document.getElementById('modal-password').classList.replace('flex', 'hidden'); idToDelete = null; };
+        
+        window.confirmDelete = () => {
+            if (document.getElementById('del-pass').value === ADMIN_PASS) {
+                const idx = localOrders.findIndex(o => o.id === idToDelete);
+                if(idx > -1) {
+                    localOrders[idx].status = 'd'; // 'd' es de Deleted (Oculto). Así GitHub sabrá que se borró y no lo regresará.
+                    localOrders[idx].updatedAt = Date.now();
+                }
+                saveDataLocal(); updateViews(); syncWithGitHub(); closePasswordModal();
+            } else {
+                alert("Contraseña incorrecta.");
+            }
+        };
 
         function saveDataLocal() { 
             const limite = 35 * 24 * 60 * 60 * 1000;
-            // Solo purga si es un historial de más de 35 días (para no dañar finanzas del mes)
             localOrders = localOrders.filter(o => (Date.now() - o.updatedAt < limite)); 
             localStorage.setItem('scrappy_db', JSON.stringify(localOrders)); 
             localExpenses = localExpenses.filter(e => (Date.now() - e.updatedAt < limite));
@@ -359,7 +379,7 @@
         }
 
         // ==========================================
-        // GITHUB SYNC
+        // 6. MOTOR GITHUB SYNC
         // ==========================================
         window.openConfig = () => document.getElementById('modal-config').classList.replace('hidden', 'flex');
         window.closeConfig = () => document.getElementById('modal-config').classList.replace('flex', 'hidden');
@@ -407,7 +427,7 @@
         }
 
         // ==========================================
-        // LÓGICA DE CONTROL, HISTORIAL Y FINANZAS
+        // 7. LÓGICA DE CONTROL (FINANZAS E HISTORIAL)
         // ==========================================
         window.switchControlTab = (tab) => {
             if(tab === 'finanzas') {
@@ -432,21 +452,6 @@
             saveDataLocal(); closeExpense(); updateViews(); syncWithGitHub();
         };
 
-        window.askDel = (id) => {
-            idToDelete = id;
-            document.getElementById('del-pass').value = '';
-            document.getElementById('modal-password').classList.replace('hidden', 'flex');
-        };
-        window.closePasswordModal = () => { document.getElementById('modal-password').classList.replace('flex', 'hidden'); idToDelete = null; };
-        window.confirmDelete = () => {
-            if (document.getElementById('del-pass').value === ADMIN_PASS) {
-                localOrders = localOrders.filter(o => o.id !== idToDelete);
-                saveDataLocal(); updateViews(); syncWithGitHub(); closePasswordModal();
-            } else {
-                alert("Contraseña incorrecta.");
-            }
-        };
-
         function getStartOfCustomWeek(dateObj) {
             const d = new Date(dateObj); const day = d.getDay(); const diff = (day === 6) ? 0 : (day + 1);
             d.setDate(d.getDate() - diff); d.setHours(0, 0, 0, 0); return d.getTime();
@@ -457,7 +462,6 @@
             const startOfWeek = getStartOfCustomWeek(now); const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
             let s = { d: 0, w: 0, m: 0 }; let e = { d: 0, w: 0, m: 0 };
             
-            // OJO: Solo los pedidos Entregados ('f') suman a las finanzas. Los 'c' se ignoran.
             localOrders.filter(o => o.status === 'f').forEach(o => {
                 if (o.created >= today) s.d += o.total; if (o.created >= startOfWeek) s.w += o.total; if (o.created >= startOfMonth) s.m += o.total;
             });
@@ -478,7 +482,7 @@
                 <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-200 relative overflow-hidden"><div class="absolute -right-4 -top-4 text-6xl text-slate-50 opacity-50"><i class="fa-solid fa-calendar-days"></i></div><h3 class="font-black text-slate-400 uppercase tracking-widest text-xs mb-3 relative z-10">Este Mes</h3><div class="flex justify-between items-center mb-2 relative z-10"><span class="font-bold text-slate-600 text-sm">Ventas Totales</span><span class="font-black text-green-600 text-lg">+$${fin.s.m}</span></div><div class="flex justify-between items-center relative z-10"><span class="font-bold text-slate-600 text-sm">Gastos Totales</span><span class="font-black text-red-500 text-lg">-$${fin.e.m}</span></div><div class="mt-4 pt-4 border-t border-slate-100 flex justify-between items-center relative z-10"><span class="font-black text-slate-800 uppercase tracking-tighter">Neta Mensual</span><span class="font-black text-2xl ${fin.s.m - fin.e.m >= 0 ? 'text-slate-800' : 'text-red-600'}">$${fin.s.m - fin.e.m}</span></div></div>
             `;
 
-            // RENDER HISTORIAL (Solo últimos 7 días visualmente)
+            // RENDER HISTORIAL: Filtra para que NO salgan los destruidos ('d')
             const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
             const hist = localOrders.filter(x => (x.status === 'f' || x.status === 'c') && x.created >= sevenDaysAgo).sort((a,b) => b.created - a.created);
             
@@ -526,7 +530,7 @@
                                 ${i.selSauces && i.selSauces.length ? `<p class="text-orange-600">🌶️ SALSAS: ${i.selSauces.join(', ')}</p>` : ''}
                                 ${i.removed && i.removed.length ? `<p class="text-red-500">❌ Sin: ${i.removed.join(', ')}</p>` : ''}
                                 ${i.extras && i.extras.length ? `<p class="text-green-600">➕ Con: ${i.extras.map(x=>x.n).join(', ')}</p>` : ''}
-                                ${i.gen ? `<p class="text-purple-600">➕ Extra $10: x${i.gen}</p>` : ''}
+                                ${i.gen ? `<p class="text-purple-600">➕ Extras Gen: x${i.gen}</p>` : ''}
                                 ${i.notes ? `<p class="text-blue-500 underline">Nota: ${i.notes}</p>` : ''}
                             </div></div>`).join('')}
                     </div>
