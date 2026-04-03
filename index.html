@@ -14,6 +14,7 @@
         ::-webkit-scrollbar { width: 0px; }
         .btn-meat:checked + div { border-color: #ea580c; background-color: #fff7ed; color: #9a3412; border-width: 2px; }
         .btn-sweet:checked + div { border-color: #ec4899; background-color: #fdf2f8; color: #be185d; border-width: 2px; }
+        .btn-sauce:checked + div { border-color: #ea580c; background-color: #fff7ed; color: #ea580c; border-width: 2px; }
         .timer-alert { color: #ef4444; font-weight: 900; animation: blink 1s infinite; }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
         @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
@@ -73,28 +74,23 @@
             </div>
         </section>
 
-        <!-- VISTA 2: COCINA -->
+        <!-- VISTAS COCINA, REPARTO Y CONTROL -->
         <section id="view-kitchen" class="p-4 hidden space-y-4 bg-slate-100 min-h-full">
             <h2 class="text-xl font-black text-slate-800 uppercase italic tracking-tighter"><span class="text-2xl">🍳</span> Pedidos Activos</h2>
             <div id="kitchen-list" class="space-y-4 pb-10"></div>
         </section>
 
-        <!-- VISTA 3: REPARTO -->
         <section id="view-delivery" class="p-4 hidden space-y-4 bg-slate-100 min-h-full">
             <h2 class="text-xl font-black text-slate-800 uppercase italic tracking-tighter"><span class="text-2xl">🛵</span> Listos p' Reparto</h2>
             <div id="delivery-list" class="space-y-4 pb-10"></div>
         </section>
 
-        <!-- VISTA 4: CONTROL (FINANZAS) -->
         <section id="view-control" class="p-4 hidden space-y-4 bg-slate-100 min-h-full">
             <div class="flex justify-between items-center mb-2">
                 <h2 class="text-xl font-black text-slate-800 uppercase italic tracking-tighter"><span class="text-2xl">📊</span> Finanzas</h2>
                 <button onclick="openExpense()" class="bg-slate-800 text-white font-black text-xs px-4 py-2 rounded-xl uppercase tracking-widest shadow-md active:scale-95 transition-transform"><i class="fa-solid fa-plus"></i> Gasto</button>
             </div>
-            
-            <div id="control-dashboard" class="space-y-4 pb-10">
-                <!-- Inyectadas por JS -->
-            </div>
+            <div id="control-dashboard" class="space-y-4 pb-10"></div>
         </section>
 
     </main>
@@ -105,18 +101,12 @@
             <h3 class="text-2xl font-black text-slate-800 mb-2"><i class="fa-solid fa-money-bill-wave text-red-500"></i> Registrar Gasto</h3>
             <p class="text-xs text-slate-500 mb-6">Se restará automáticamente de las ganancias.</p>
             <div class="space-y-4 mb-6">
-                <div>
-                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Monto ($)</label>
-                    <input type="number" id="exp-amount" placeholder="Ej. 150" class="w-full p-4 bg-slate-50 border rounded-xl font-black text-xl text-slate-800 outline-none focus:border-red-500">
-                </div>
-                <div>
-                    <label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Descripción (Opcional)</label>
-                    <input type="text" id="exp-desc" placeholder="Ej. Pan, Gasolina, Verdura..." class="w-full p-4 bg-slate-50 border rounded-xl font-bold text-slate-700 outline-none focus:border-red-500">
-                </div>
+                <div><label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Monto ($)</label><input type="number" id="exp-amount" placeholder="Ej. 150" class="w-full p-4 bg-slate-50 border rounded-xl font-black text-xl text-slate-800 outline-none focus:border-red-500"></div>
+                <div><label class="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Descripción (Opcional)</label><input type="text" id="exp-desc" placeholder="Ej. Pan, Gasolina, Verdura..." class="w-full p-4 bg-slate-50 border rounded-xl font-bold text-slate-700 outline-none focus:border-red-500"></div>
             </div>
             <div class="flex gap-3">
                 <button onclick="closeExpense()" class="flex-1 bg-slate-100 text-slate-500 font-black py-4 rounded-xl uppercase text-xs">Cancelar</button>
-                <button onclick="saveExpense()" class="flex-[2] bg-red-600 text-white font-black py-4 rounded-xl uppercase text-sm shadow-lg active:scale-95 transition-transform">Descontar Gasto</button>
+                <button onclick="saveExpense()" class="flex-[2] bg-red-600 text-white font-black py-4 rounded-xl uppercase text-sm shadow-lg active:scale-95 transition-transform">Descontar</button>
             </div>
         </div>
     </div>
@@ -146,6 +136,7 @@
                 <button onclick="closeModal()" class="bg-slate-100 text-slate-400 w-10 h-10 rounded-full font-black text-xl flex items-center justify-center">&times;</button>
             </div>
 
+            <!-- Modificadores -->
             <div id="m-meat-sec" class="mb-6 hidden">
                 <p class="text-[10px] font-black text-red-500 uppercase tracking-widest mb-3">🥩 Carne Requerida:</p>
                 <div class="grid grid-cols-2 gap-3" id="meat-grid"></div>
@@ -155,12 +146,19 @@
                 </div>
             </div>
 
-            <div id="m-sweet-sec" class="mb-6 hidden"><p class="text-[10px] font-black text-pink-500 uppercase tracking-widest mb-3">🍓 Ingredientes (Elige hasta 3):</p><div class="grid grid-cols-2 gap-3" id="sweet-grid"></div></div>
-            <div id="m-veg-sec" class="mb-6 hidden"><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">❌ Quitar:</p><div class="flex flex-wrap gap-2" id="veg-grid"></div></div>
-            <div id="m-ext-sec" class="mb-6 hidden"><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">➕ Complementos:</p><div class="flex flex-wrap gap-2" id="ext-grid"></div></div>
+            <!-- Aderezos para Alitas / Boneless -->
+            <div id="m-sauce-sec" class="mb-6 hidden">
+                <p class="text-[10px] font-black text-orange-600 uppercase tracking-widest mb-3">🌶️ Aderezos <span id="sauce-req-text"></span>:</p>
+                <div class="grid grid-cols-2 gap-3" id="sauce-grid"></div>
+            </div>
 
+            <div id="m-sweet-sec" class="mb-6 hidden"><p class="text-[10px] font-black text-pink-500 uppercase tracking-widest mb-3">🍓 Ingredientes (Elige hasta 3):</p><div class="grid grid-cols-2 gap-3" id="sweet-grid"></div></div>
+            <div id="m-veg-sec" class="mb-6 hidden"><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">❌ Quitar (Verduras y Aderezos base):</p><div class="flex flex-wrap gap-2" id="veg-grid"></div></div>
+            <div id="m-ext-sec" class="mb-6 hidden"><p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">➕ Complementos y Salsas Extra:</p><div class="flex flex-wrap gap-2" id="ext-grid"></div></div>
+
+            <!-- Extra Genérico $10 -->
             <div class="flex justify-between items-center bg-slate-50 p-4 rounded-2xl mb-6 border border-slate-200">
-                <span class="font-black text-sm uppercase italic text-slate-700">Cualquier Extra ($10)</span>
+                <span class="font-black text-sm uppercase italic text-slate-700">Cualquier Extra Múltiple ($10)</span>
                 <div class="flex items-center gap-4">
                     <button onclick="changeGenExt(-1)" class="w-10 h-10 bg-white border border-slate-300 rounded-full font-black text-slate-400 text-xl">-</button><span id="m-gen-val" class="font-black text-2xl text-orange-600 w-6 text-center">0</span><button onclick="changeGenExt(1)" class="w-10 h-10 bg-orange-600 text-white rounded-full font-black text-xl shadow-md">+</button>
                 </div>
@@ -188,33 +186,37 @@
 
     <script>
         // ==========================================
-        // DATOS DEL MENÚ
+        // 1. DATOS DEL MENÚ Y LISTAS ESPECÍFICAS
         // ==========================================
         const menu = [
-            { cat: "Hamb. Res", icon: "🍔", items: [ { id: 'r1', n: "Scrappy Clasica", p: 60, v: true, e: true }, { id: 'r2', n: "Tocino Crunch", p: 70, v: true, e: true }, { id: 'r3', n: "Double Cheese Chipotle", p: 75, v: true, e: true }, { id: 'r4', n: "Big Scrappy", p: 80, v: true, e: true } ] },
-            { cat: "Hamb. Pollo", icon: "🐔", items: [ { id: 'p1', n: "Simple Chiken", p: 60, v: true, e: true }, { id: 'p2', n: "Big Chiken", p: 70, v: true, e: true } ] },
-            { cat: "Especialidades", icon: "🥪", items: [ { id: 'e1', n: "Lonche", p: 44, v: true, e: true, meat: true }, { id: 'e2', n: "Sandwich", p: 30, v: true, e: true, meat: true }, { id: 'e3', n: "2 Sincronizadas", p: 45, v: true, e: true, meat: true }, { id: 'e4', n: "2 Quesadillas Harina", p: 50, v: false, e: true }, { id: 'b5', n: "Waffles", p: 45, sweet: true }, { id: 'b6', n: "Crepas", p: 40, sweet: true } ] },
-            { cat: "Snacks", icon: "🍟", items: [ { id: 's1', n: "Alitas (Medio Kilo)", p: 100 }, { id: 's2', n: "Boneless", p: 99 }, { id: 's3', n: "Papas Gajo", p: 45 }, { id: 's4', n: "Papas Gajo Queso", p: 65 }, { id: 's5', n: "Papa Francesa", p: 35 }, { id: 's6', n: "Dedos de Queso", p: 80 }, { id: 's7', n: "Aros Cebolla", p: 60 }, { id: 's8', n: "Hot Dog Sencillo", p: 25, v: true, e: true }, { id: 's9', n: "Hot Dog Tocino", p: 32, v: true, e: true } ] },
+            { cat: "Hamb. Res", icon: "🍔", items: [ { id: 'r1', n: "Scrappy Clasica", p: 60, v: 'burger', e: true }, { id: 'r2', n: "Tocino Crunch", p: 70, v: 'burger', e: true }, { id: 'r3', n: "Double Cheese Chipotle", p: 75, v: 'burger', e: true }, { id: 'r4', n: "Big Scrappy", p: 80, v: 'burger', e: true } ] },
+            { cat: "Hamb. Pollo", icon: "🐔", items: [ { id: 'p1', n: "Simple Chiken", p: 60, v: 'burger', e: true }, { id: 'p2', n: "Big Chiken", p: 70, v: 'burger', e: true } ] },
+            { cat: "Especialidades", icon: "🥪", items: [ { id: 'e1', n: "Lonche", p: 44, v: 'burger', e: true, meat: true }, { id: 'e2', n: "Sandwich", p: 30, v: 'burger', e: true, meat: true }, { id: 'e3', n: "2 Sincronizadas", p: 45, v: 'burger', e: true, meat: true }, { id: 'e4', n: "2 Quesadillas Harina", p: 50, v: false, e: true }, { id: 'b5', n: "Waffles", p: 45, sweet: true }, { id: 'b6', n: "Crepas", p: 40, sweet: true } ] },
+            { cat: "Snacks", icon: "🍟", items: [ { id: 's1', n: "Alitas (Medio Kilo)", p: 100, e: true, reqSauces: 2 }, { id: 's2', n: "Boneless", p: 99, e: true, reqSauces: 2 }, { id: 's3', n: "Papas Gajo", p: 45, e: true }, { id: 's4', n: "Papas Gajo Queso", p: 65, e: true }, { id: 's5', n: "Papa Francesa", p: 35, e: true }, { id: 's6', n: "Dedos de Queso", p: 80, e: true }, { id: 's7', n: "Aros Cebolla", p: 60, e: true }, { id: 's8', n: "Hot Dog Sencillo", p: 25, v: 'hotdog', e: true }, { id: 's9', n: "Hot Dog Tocino", p: 32, v: 'hotdog', e: true } ] },
             { cat: "Bebidas", icon: "🥤", items: [ { id: 'b1', n: "Coca 500ml", p: 24 }, { id: 'b2', n: "Coca 250ml", p: 12 }, { id: 'b3', n: "Malteada", p: 25 }, { id: 'b4', n: "Perla Explosiva", p: 50 } ] }
         ];
 
-        const VEG = ["Jitomate", "Cebolla", "Lechuga", "Jalapeño", "Aguacate"];
-        const EXT = [{ n: "Papas Francesa", p: 18 }, { n: "Aros Cebolla", p: 10 }, { n: "Aderezo Extra", p: 10 }, { n: "Salchicha Frita", p: 10 }];
+        const VEG_BURGER = ["Jitomate", "Cebolla", "Lechuga", "Jalapeño", "Aguacate", "Catsup", "Mostaza"];
+        const VEG_HOTDOG = ["Jitomate", "Cebolla asada", "Jalapeño", "Catsup", "Mostaza"];
+        const SAUCES = ["Ranch", "BBQ", "Búfalo", "Mango Habanero"];
+        const EXT = [
+            { n: "Papas Francesa", p: 18 }, { n: "Aros Cebolla", p: 10 }, { n: "Salchicha Frita", p: 10 },
+            { n: "Extra Ranch", p: 10 }, { n: "Extra BBQ", p: 10 }, { n: "Extra Búfalo", p: 10 }, { n: "Extra Mango Hab.", p: 10 }
+        ];
         const MEATS = ["Pierna", "Jamón", "Pollo", "Mixto"];
         const SWEETS = ["Fresa", "Manzana", "Plátano", "Chocolate", "Lechera", "Miel de Maple"];
 
         // ==========================================
-        // ESTADO GLOBAL
+        // 2. ESTADO GLOBAL
         // ==========================================
         let cart = []; let curItem = null; let editId = null;
         let localOrders = JSON.parse(localStorage.getItem('scrappy_db')) || [];
         let localExpenses = JSON.parse(localStorage.getItem('scrappy_exp')) || []; 
-        
         let ghUser = localStorage.getItem('gh_user') || ''; let ghRepo = localStorage.getItem('gh_repo') || ''; let ghToken = localStorage.getItem('gh_token') || '';
         let ghSha = null; let isSyncing = false;
 
         // ==========================================
-        // UI PRINCIPAL
+        // 3. UI PRINCIPAL
         // ==========================================
         function initUI() {
             const catGrid = document.getElementById('pos-categories');
@@ -241,42 +243,54 @@
                 msg += `🔸 ${i.qty}x ${i.n}\n`;
                 if(i.meat) msg += `   🥩 ${i.meat === 'Mixto' ? 'Mixto ('+i.mixed.join('+')+')' : i.meat}\n`;
                 if(i.sweetOpts && i.sweetOpts.length) msg += `   🍓 ${i.sweetOpts.join(', ')}\n`;
+                if(i.selSauces && i.selSauces.length) msg += `   🌶️ Salsas: ${i.selSauces.join(', ')}\n`;
                 if(i.removed && i.removed.length) msg += `   ❌ Sin: ${i.removed.join(', ')}\n`;
                 if(i.extras && i.extras.length) msg += `   ➕ Con: ${i.extras.map(x=>x.n).join(', ')}\n`;
                 if(i.gen) msg += `   ➕ Extras ($10): x${i.gen}\n`;
                 if(i.notes) msg += `   📝 Nota: ${i.notes}\n`;
             });
             msg += `\n📍 *Dirección:* ${o.address}\n💰 *Total a pagar:* $${o.total}\n\n¡En breve lo preparamos! 🛵💨`;
-            let phoneStr = o.phone.replace(/\D/g,'');
-            if(phoneStr.length === 10) phoneStr = '52' + phoneStr; 
+            let phoneStr = o.phone.replace(/\D/g,''); if(phoneStr.length === 10) phoneStr = '52' + phoneStr; 
             window.open(`https://wa.me/${phoneStr}?text=${encodeURIComponent(msg)}`, '_blank');
         };
 
         // ==========================================
-        // MODALES POS
+        // MODALES Y LÓGICA DE PERSONALIZACIÓN
         // ==========================================
         window.openM = (it) => {
-            curItem = { ...it, base: it.p, qty: 1, removed: [], extras: [], meat: null, mixed: [], sweetOpts: [], gen: 0, notes: "", needsMeat: it.meat, total: it.p };
+            curItem = { ...it, base: it.p, qty: 1, removed: [], extras: [], meat: null, mixed: [], sweetOpts: [], selSauces: [], gen: 0, notes: "", needsMeat: it.meat, total: it.p };
             document.getElementById('m-name').innerText = it.n; document.getElementById('m-qty').innerText = 1; document.getElementById('m-gen-val').innerText = 0; document.getElementById('m-notes').value = "";
-            const vSec = document.getElementById('m-veg-sec'); it.v ? (vSec.classList.remove('hidden'), renderVeg()) : vSec.classList.add('hidden');
-            const eSec = document.getElementById('m-ext-sec'); it.e ? (eSec.classList.remove('hidden'), renderExt()) : eSec.classList.add('hidden');
-            const mSec = document.getElementById('m-meat-sec'); it.meat ? (mSec.classList.remove('hidden'), renderMeat()) : mSec.classList.add('hidden');
+            
+            const vSec = document.getElementById('m-veg-sec'); if (it.v) { vSec.classList.remove('hidden'); renderVeg(); } else { vSec.classList.add('hidden'); }
+            const eSec = document.getElementById('m-ext-sec'); if (it.e) { eSec.classList.remove('hidden'); renderExt(); } else { eSec.classList.add('hidden'); }
+            const mSec = document.getElementById('m-meat-sec'); if (it.meat) { mSec.classList.remove('hidden'); renderMeat(); } else { mSec.classList.add('hidden'); }
             const swSec = document.getElementById('m-sweet-sec'); if (it.sweet) { swSec.classList.remove('hidden'); renderSweet(); } else { swSec.classList.add('hidden'); }
+            
+            const sSec = document.getElementById('m-sauce-sec'); 
+            if (it.reqSauces) { sSec.classList.remove('hidden'); document.getElementById('sauce-req-text').innerText = `(Obligatorio elegir ${it.reqSauces})`; renderSauces(); } else { sSec.classList.add('hidden'); }
+            
             calcM(); document.getElementById('modal').classList.replace('hidden', 'flex');
         };
 
         window.closeModal = () => document.getElementById('modal').classList.replace('flex', 'hidden');
 
-        function renderVeg() { document.getElementById('veg-grid').innerHTML = VEG.map(v => `<button onclick="togVeg('${v}')" class="px-4 py-2 border-2 border-slate-200 rounded-xl text-xs font-black text-slate-400 active:scale-95 transition-all ${curItem.removed.includes(v) ? 'bg-red-50 border-red-500 text-red-500' : 'bg-white'}">Sin ${v}</button>`).join(''); }
+        function getVegList() { return curItem.v === 'hotdog' ? VEG_HOTDOG : VEG_BURGER; }
+        function renderVeg() { const list = getVegList(); document.getElementById('veg-grid').innerHTML = list.map(v => `<button onclick="togVeg('${v}')" class="px-4 py-2 border-2 border-slate-200 rounded-xl text-xs font-black text-slate-400 active:scale-95 transition-all ${curItem.removed.includes(v) ? 'bg-red-50 border-red-500 text-red-500' : 'bg-white'}">Sin ${v}</button>`).join(''); }
         window.togVeg = (v) => { const idx = curItem.removed.indexOf(v); idx === -1 ? curItem.removed.push(v) : curItem.removed.splice(idx, 1); renderVeg(); };
+        
         function renderExt() { document.getElementById('ext-grid').innerHTML = EXT.map((e, i) => `<button onclick="togExt(${i})" class="px-4 py-2 border-2 border-slate-200 rounded-xl text-xs font-black text-slate-400 active:scale-95 transition-all ${curItem.extras.find(x=>x.n===e.n) ? 'bg-green-50 border-green-500 text-green-600' : 'bg-white'}">+ ${e.n} ($${e.p})</button>`).join(''); }
         window.togExt = (i) => { const e = EXT[i]; const idx = curItem.extras.findIndex(x => x.n === e.n); idx === -1 ? curItem.extras.push(e) : curItem.extras.splice(idx, 1); renderExt(); calcM(); };
+        
         function renderMeat() { document.getElementById('meat-grid').innerHTML = MEATS.map(m => `<label class="cursor-pointer"><input type="radio" name="m" class="hidden btn-meat" ${curItem.meat === m ? 'checked' : ''} onchange="setMeat('${m}')"><div class="border-2 border-slate-200 rounded-2xl p-4 text-center text-xs font-black text-slate-500 transition-all uppercase">${m}</div></label>`).join(''); }
         window.setMeat = (m) => { curItem.meat = m; curItem.base = m === 'Mixto' ? 50 : curItem.p; const mixSec = document.getElementById('m-mixed-opts'); m === 'Mixto' ? (mixSec.classList.remove('hidden'), renderMixed()) : (mixSec.classList.add('hidden'), curItem.mixed=[]); calcM(); };
         function renderMixed() { const opts = ["Pierna", "Jamón", "Pollo"]; document.getElementById('mixed-grid').innerHTML = opts.map(o => `<label class="flex-1 cursor-pointer"><input type="checkbox" class="hidden btn-meat" ${curItem.mixed.includes(o) ? 'checked' : ''} onchange="togMix('${o}')"><div class="border-2 border-orange-200 bg-white rounded-xl p-3 text-center text-[10px] font-black text-orange-600 uppercase transition-all">${o}</div></label>`).join(''); }
         window.togMix = (o) => { const idx = curItem.mixed.indexOf(o); if(idx === -1) { if(curItem.mixed.length >= 2) return alert("Solo 2 carnes!"); curItem.mixed.push(o); } else { curItem.mixed.splice(idx, 1); } renderMixed(); };
+        
         function renderSweet() { document.getElementById('sweet-grid').innerHTML = SWEETS.map(s => `<label class="cursor-pointer w-full"><input type="checkbox" class="hidden btn-sweet" ${curItem.sweetOpts.includes(s) ? 'checked' : ''} onchange="togSweet('${s}')"><div class="border-2 border-slate-200 bg-white rounded-2xl p-3 text-center text-xs font-black text-slate-500 uppercase transition-all">${s}</div></label>`).join(''); }
         window.togSweet = (s) => { const idx = curItem.sweetOpts.indexOf(s); if (idx === -1) { if (curItem.sweetOpts.length >= 3) return alert("Límite de 3 ingredientes superado."); curItem.sweetOpts.push(s); } else { curItem.sweetOpts.splice(idx, 1); } renderSweet(); };
+
+        function renderSauces() { document.getElementById('sauce-grid').innerHTML = SAUCES.map(s => `<label class="cursor-pointer w-full"><input type="checkbox" class="hidden btn-sauce" ${curItem.selSauces.includes(s) ? 'checked' : ''} onchange="togSauce('${s}')"><div class="border-2 border-slate-200 bg-white rounded-2xl p-3 text-center text-xs font-black text-slate-500 uppercase transition-all">${s}</div></label>`).join(''); }
+        window.togSauce = (s) => { const idx = curItem.selSauces.indexOf(s); if (idx === -1) { if (curItem.selSauces.length >= curItem.reqSauces) return alert(`Solo puedes elegir ${curItem.reqSauces} aderezos.`); curItem.selSauces.push(s); } else { curItem.selSauces.splice(idx, 1); } renderSauces(); };
 
         window.changeGenExt = (v) => { if(curItem.gen+v >= 0) curItem.gen += v; document.getElementById('m-gen-val').innerText = curItem.gen; calcM(); };
         window.changeQty = (v) => { if(curItem.qty+v >= 1) curItem.qty += v; document.getElementById('m-qty').innerText = curItem.qty; calcM(); };
@@ -286,6 +300,7 @@
             if(curItem.needsMeat && !curItem.meat) return alert("Falta elegir carne.");
             if(curItem.meat === 'Mixto' && curItem.mixed.length !== 2) return alert("Debes elegir 2 carnes pal Mixto.");
             if(curItem.sweet && curItem.sweetOpts.length === 0) return alert("Selecciona mínimo 1 ingrediente.");
+            if(curItem.reqSauces && curItem.selSauces.length !== curItem.reqSauces) return alert(`Debes elegir exactamente ${curItem.reqSauces} aderezos.`);
             curItem.notes = document.getElementById('m-notes').value.trim();
             cart.push(curItem); renderCart(); closeModal();
         };
@@ -302,6 +317,7 @@
                 let dets = [];
                 if(it.meat) dets.push(`<span class="text-orange-700">🥩 ${it.meat === 'Mixto' ? 'Mixto ('+it.mixed.join('+')+')' : it.meat}</span>`);
                 if(it.sweetOpts && it.sweetOpts.length) dets.push(`<span class="text-pink-600 font-bold">🍓 ${it.sweetOpts.join(', ')}</span>`);
+                if(it.selSauces && it.selSauces.length) dets.push(`<span class="text-orange-600 font-bold">🌶️ Salsas: ${it.selSauces.join(', ')}</span>`);
                 if(it.removed && it.removed.length) dets.push(`<span class="text-red-500">❌ Sin: ${it.removed.join(', ')}</span>`);
                 if(it.extras && it.extras.length) dets.push(`<span class="text-green-600">➕ ${it.extras.map(x=>x.n).join(', ')}</span>`);
                 if(it.gen) dets.push(`<span class="text-purple-600">➕ Extra $10 x${it.gen}</span>`);
@@ -396,7 +412,7 @@
         }
 
         // ==========================================
-        // LÓGICA DE CONTROL (SAB-VIE Y FECHAS EN GASTOS)
+        // LÓGICA DE CONTROL Y FINANZAS
         // ==========================================
         window.openExpense = () => { document.getElementById('exp-amount').value = ''; document.getElementById('exp-desc').value = ''; document.getElementById('modal-expense').classList.replace('hidden', 'flex'); };
         window.closeExpense = () => { document.getElementById('modal-expense').classList.replace('flex', 'hidden'); };
@@ -411,12 +427,8 @@
         };
 
         function getStartOfCustomWeek(dateObj) {
-            // Logica: La semana empieza el Sabado (día 6).
-            // getDay() devuelve 0 (Dom) a 6 (Sab).
             const d = new Date(dateObj);
             const day = d.getDay();
-            // Si hoy es Sabado (6), restar 0 días. Si es Domingo (0), restar 1. Si es Lunes (1), restar 2... 
-            // La fórmula es: si day == 6 -> diff = 0. si day < 6 -> diff = day + 1
             const diff = (day === 6) ? 0 : (day + 1);
             d.setDate(d.getDate() - diff);
             d.setHours(0, 0, 0, 0);
@@ -426,24 +438,18 @@
         function calculateFinances() {
             const now = new Date();
             const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-            
-            // Inicio de semana (Sábado)
             const startOfWeek = getStartOfCustomWeek(now);
-            
-            // Inicio de mes
             const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
 
             let s = { d: 0, w: 0, m: 0 };
             let e = { d: 0, w: 0, m: 0 };
 
-            // Ventas (Solo cuenta entregados 'f')
             localOrders.filter(o => o.status === 'f').forEach(o => {
                 if (o.created >= today) s.d += o.total;
                 if (o.created >= startOfWeek) s.w += o.total;
                 if (o.created >= startOfMonth) s.m += o.total;
             });
 
-            // Gastos
             localExpenses.forEach(exp => {
                 if (exp.date >= today) e.d += exp.amount;
                 if (exp.date >= startOfWeek) e.w += exp.amount;
@@ -455,38 +461,23 @@
 
         function renderControl() {
             const fin = calculateFinances();
-            
-            // Bloque de Hoy (Con lista de gastos recientes y su hora)
             const recentExp = localExpenses.filter(e => e.date >= new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()).getTime());
             const expListHTML = recentExp.map(e => `
                 <div class="flex justify-between items-center text-[10px] text-slate-500 border-t border-slate-100 pt-2 mt-2">
-                    <div class="flex flex-col">
-                        <span class="font-bold text-slate-700">${e.desc}</span>
-                        <span class="text-[9px] text-slate-400"><i class="fa-regular fa-clock"></i> ${e.timeStr || ''}</span>
-                    </div>
+                    <div class="flex flex-col"><span class="font-bold text-slate-700">${e.desc}</span><span class="text-[9px] text-slate-400"><i class="fa-regular fa-clock"></i> ${e.timeStr || ''}</span></div>
                     <span class="text-red-500 font-black text-sm">-$${e.amount}</span>
                 </div>
             `).join('');
 
             document.getElementById('control-dashboard').innerHTML = `
-                <!-- HOY -->
                 <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-200 relative overflow-hidden">
                     <div class="absolute -right-4 -top-4 text-6xl text-slate-50 opacity-50"><i class="fa-solid fa-calendar-day"></i></div>
                     <h3 class="font-black text-slate-400 uppercase tracking-widest text-xs mb-3 relative z-10">Resumen de Hoy</h3>
-                    <div class="flex justify-between items-center mb-2 relative z-10">
-                        <span class="font-bold text-slate-600 text-sm">Ventas Entregadas</span><span class="font-black text-green-600 text-lg">+$${fin.s.d}</span>
-                    </div>
-                    <div class="flex justify-between items-center mb-1 relative z-10">
-                        <span class="font-bold text-slate-600 text-sm">Gastos del Día</span><span class="font-black text-red-500 text-lg">-$${fin.e.d}</span>
-                    </div>
+                    <div class="flex justify-between items-center mb-2 relative z-10"><span class="font-bold text-slate-600 text-sm">Ventas Entregadas</span><span class="font-black text-green-600 text-lg">+$${fin.s.d}</span></div>
+                    <div class="flex justify-between items-center mb-1 relative z-10"><span class="font-bold text-slate-600 text-sm">Gastos del Día</span><span class="font-black text-red-500 text-lg">-$${fin.e.d}</span></div>
                     <div class="relative z-10 mb-4">${expListHTML}</div>
-                    <div class="mt-4 pt-4 border-t border-slate-100 flex justify-between items-center relative z-10">
-                        <span class="font-black text-slate-800 uppercase tracking-tighter">Ganancia Neta</span>
-                        <span class="font-black text-3xl ${fin.s.d - fin.e.d >= 0 ? 'text-slate-800' : 'text-red-600'}">$${fin.s.d - fin.e.d}</span>
-                    </div>
+                    <div class="mt-4 pt-4 border-t border-slate-100 flex justify-between items-center relative z-10"><span class="font-black text-slate-800 uppercase tracking-tighter">Ganancia Neta</span><span class="font-black text-3xl ${fin.s.d - fin.e.d >= 0 ? 'text-slate-800' : 'text-red-600'}">$${fin.s.d - fin.e.d}</span></div>
                 </div>
-
-                <!-- SEMANA -->
                 <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-200 relative overflow-hidden">
                     <div class="absolute -right-4 -top-4 text-6xl text-slate-50 opacity-50"><i class="fa-solid fa-calendar-week"></i></div>
                     <h3 class="font-black text-slate-400 uppercase tracking-widest text-xs mb-3 relative z-10">Esta Semana (Sáb - Vie)</h3>
@@ -494,8 +485,6 @@
                     <div class="flex justify-between items-center relative z-10"><span class="font-bold text-slate-600 text-sm">Gastos Totales</span><span class="font-black text-red-500 text-lg">-$${fin.e.w}</span></div>
                     <div class="mt-4 pt-4 border-t border-slate-100 flex justify-between items-center relative z-10"><span class="font-black text-slate-800 uppercase tracking-tighter">Neta Semanal</span><span class="font-black text-2xl ${fin.s.w - fin.e.w >= 0 ? 'text-slate-800' : 'text-red-600'}">$${fin.s.w - fin.e.w}</span></div>
                 </div>
-
-                <!-- MES -->
                 <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-200 relative overflow-hidden">
                     <div class="absolute -right-4 -top-4 text-6xl text-slate-50 opacity-50"><i class="fa-solid fa-calendar-days"></i></div>
                     <h3 class="font-black text-slate-400 uppercase tracking-widest text-xs mb-3 relative z-10">Este Mes</h3>
@@ -515,7 +504,6 @@
             const bk = document.getElementById('badge-k'); bk.innerText = p.length; bk.style.display = p.length ? 'block' : 'none';
             const bd = document.getElementById('badge-d'); bd.innerText = r.length; bd.style.display = r.length ? 'block' : 'none';
 
-            // COCINA
             document.getElementById('kitchen-list').innerHTML = !p.length ? `<div class="text-center text-slate-300 py-20 font-black uppercase tracking-widest">Cocina Limpia</div>` : p.map(o => `
                 <div class="bg-white border-l-8 border-red-500 rounded-3xl p-5 shadow-lg relative">
                     <div class="absolute top-4 right-4 flex gap-2">
@@ -531,6 +519,7 @@
                             <div class="text-[10px] font-bold text-slate-500 uppercase mt-2 italic space-y-1">
                                 ${i.meat ? `<p class="text-orange-700">🥩 ${i.meat === 'Mixto' ? 'Mixto ('+i.mixed.join('+')+')' : i.meat}</p>` : ''}
                                 ${i.sweetOpts && i.sweetOpts.length ? `<p class="text-pink-600">🍓 ING: ${i.sweetOpts.join(', ')}</p>` : ''}
+                                ${i.selSauces && i.selSauces.length ? `<p class="text-orange-600">🌶️ SALSAS: ${i.selSauces.join(', ')}</p>` : ''}
                                 ${i.removed && i.removed.length ? `<p class="text-red-500">❌ Sin: ${i.removed.join(', ')}</p>` : ''}
                                 ${i.extras && i.extras.length ? `<p class="text-green-600">➕ Con: ${i.extras.map(x=>x.n).join(', ')}</p>` : ''}
                                 ${i.gen ? `<p class="text-purple-600">➕ Extra $10: x${i.gen}</p>` : ''}
@@ -540,7 +529,6 @@
                     <button onclick="upStatus('${o.id}', 'r')" class="w-full bg-red-500 text-white font-black py-5 rounded-2xl shadow-xl uppercase italic tracking-widest active:scale-95 transition-transform">Listo p' Entrega</button>
                 </div>`).join('');
 
-            // REPARTO
             document.getElementById('delivery-list').innerHTML = !r.length ? `<div class="text-center text-slate-300 py-20 font-black uppercase tracking-widest">Nada p' Repartir</div>` : r.map(o => `
                 <div class="bg-white border-l-8 border-orange-500 rounded-3xl p-5 shadow-lg relative">
                     <div class="absolute top-4 right-4 flex gap-2">
@@ -555,7 +543,7 @@
                     
                     <button onclick="document.getElementById('det-${o.id}').classList.toggle('hidden')" class="w-full bg-white text-slate-500 font-black py-3 rounded-2xl text-[10px] uppercase tracking-widest mb-4 active:scale-95 transition-transform flex justify-center items-center gap-2 border-2 border-slate-100 shadow-sm"><i class="fa-solid fa-list"></i> Ver / Ocultar Pedido</button>
                     <div id="det-${o.id}" class="hidden bg-slate-50 p-4 rounded-2xl mb-4 border border-slate-200 space-y-3 shadow-inner">
-                        ${o.cart.map(i => `<div><div class="font-black text-sm text-slate-800 leading-tight">${i.qty}x ${i.n}</div><div class="text-[10px] font-bold text-slate-500 uppercase mt-1 italic space-y-1">${i.meat ? `<p class="text-orange-700">🥩 ${i.meat === 'Mixto' ? 'Mixto ('+i.mixed.join('+')+')' : i.meat}</p>` : ''}${i.sweetOpts && i.sweetOpts.length ? `<p class="text-pink-600">🍓 ING: ${i.sweetOpts.join(', ')}</p>` : ''}${i.removed && i.removed.length ? `<p class="text-red-500">❌ Sin: ${i.removed.join(', ')}</p>` : ''}${i.extras && i.extras.length ? `<p class="text-green-600">➕ Con: ${i.extras.map(x=>x.n).join(', ')}</p>` : ''}${i.gen ? `<p class="text-purple-600">➕ Extras Gen: x${i.gen}</p>` : ''}${i.notes ? `<p class="text-blue-500 underline">Nota: ${i.notes}</p>` : ''}</div></div>`).join('<hr class="border-slate-200 my-2">')}
+                        ${o.cart.map(i => `<div><div class="font-black text-sm text-slate-800 leading-tight">${i.qty}x ${i.n}</div><div class="text-[10px] font-bold text-slate-500 uppercase mt-1 italic space-y-1">${i.meat ? `<p class="text-orange-700">🥩 ${i.meat === 'Mixto' ? 'Mixto ('+i.mixed.join('+')+')' : i.meat}</p>` : ''}${i.sweetOpts && i.sweetOpts.length ? `<p class="text-pink-600">🍓 ING: ${i.sweetOpts.join(', ')}</p>` : ''}${i.selSauces && i.selSauces.length ? `<p class="text-orange-600">🌶️ SALSAS: ${i.selSauces.join(', ')}</p>` : ''}${i.removed && i.removed.length ? `<p class="text-red-500">❌ Sin: ${i.removed.join(', ')}</p>` : ''}${i.extras && i.extras.length ? `<p class="text-green-600">➕ Con: ${i.extras.map(x=>x.n).join(', ')}</p>` : ''}${i.gen ? `<p class="text-purple-600">➕ Extras Gen: x${i.gen}</p>` : ''}${i.notes ? `<p class="text-blue-500 underline">Nota: ${i.notes}</p>` : ''}</div></div>`).join('<hr class="border-slate-200 my-2">')}
                     </div>
 
                     ${o.phone ? `<div class="grid grid-cols-2 gap-3 mb-4"><a href="tel:${o.phone}" class="bg-blue-50 text-blue-600 font-black py-4 rounded-2xl flex flex-col items-center shadow-sm active:scale-95 border border-blue-100"><i class="fa-solid fa-phone text-xl mb-1"></i><span class="text-[9px] uppercase tracking-widest">Llamar</span></a><a href="https://wa.me/52${o.phone.replace(/\D/g,'')}" target="_blank" class="bg-green-50 text-green-600 font-black py-4 rounded-2xl flex flex-col items-center shadow-sm active:scale-95 border border-green-100"><i class="fa-brands fa-whatsapp text-xl mb-1"></i><span class="text-[9px] uppercase tracking-widest">WhatsApp</span></a></div>` : ''}
