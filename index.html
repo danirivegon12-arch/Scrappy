@@ -200,9 +200,9 @@
 
     <script>
         // ==========================================
-        // 1. CONFIGURACIÓN GENERAL
+        // 1. CONFIGURACIÓN Y DATOS DE MENÚ
         // ==========================================
-        const ADMIN_PASS = "58654"; // NUEVA CONTRASEÑA
+        const ADMIN_PASS = "58654"; // CONTRASEÑA NUMÉRICA ESTABLECIDA
 
         const menu = [
             { cat: "Hamb. Res", icon: "🍔", items: [ { id: 'r1', n: "Scrappy Clasica", p: 60, v: 'burger', e: true }, { id: 'r2', n: "Tocino Crunch", p: 70, v: 'burger', e: true }, { id: 'r3', n: "Double Cheese Chipotle", p: 75, v: 'burger', e: true }, { id: 'r4', n: "Big Scrappy", p: 80, v: 'burger', e: true } ] },
@@ -219,6 +219,9 @@
         const MEATS = ["Pierna", "Jamón", "Pollo", "Mixto"];
         const SWEETS = ["Fresa", "Manzana", "Plátano", "Chocolate", "Lechera", "Miel de Maple"];
 
+        // ==========================================
+        // 2. ESTADO GLOBAL
+        // ==========================================
         let cart = []; let curItem = null; let editId = null; let idToDelete = null;
         let localOrders = JSON.parse(localStorage.getItem('scrappy_db')) || [];
         let localExpenses = JSON.parse(localStorage.getItem('scrappy_exp')) || []; 
@@ -226,7 +229,7 @@
         let ghSha = null; let isSyncing = false;
 
         // ==========================================
-        // UI PRINCIPAL Y WHATSAPP
+        // 3. UI PRINCIPAL Y WHATSAPP
         // ==========================================
         function initUI() {
             const catGrid = document.getElementById('pos-categories');
@@ -252,7 +255,12 @@
                 if(i.meat) msg += `   🥩 ${i.meat === 'Mixto' ? 'Mixto ('+i.mixed.join('+')+')' : i.meat}\n`;
                 if(i.sweetOpts && i.sweetOpts.length) msg += `   🍓 ${i.sweetOpts.join(', ')}\n`;
                 if(i.selSauces && i.selSauces.length) msg += `   🌶️ Salsas: ${i.selSauces.join(', ')}\n`;
-                if(i.removed && i.removed.length) msg += `   ❌ Sin: ${i.removed.join(', ')}\n`;
+                // Lógica de WhatsApp para CON TODO
+                if(i.removed && i.removed.length) {
+                    msg += `   ❌ Sin: ${i.removed.join(', ')}\n`;
+                } else if (i.v) {
+                    msg += `   ✅ CON TODO\n`;
+                }
                 if(i.extras && i.extras.length) msg += `   ➕ Con: ${i.extras.map(x=>x.n).join(', ')}\n`;
                 if(i.gen) msg += `   ➕ Extras ($10): x${i.gen}\n`;
                 if(i.notes) msg += `   📝 Nota: ${i.notes}\n`;
@@ -263,7 +271,7 @@
         };
 
         // ==========================================
-        // MODALES POS Y LÓGICA DE PERSONALIZACIÓN
+        // 4. MODALES POS Y LÓGICA DE PERSONALIZACIÓN
         // ==========================================
         window.openM = (it) => {
             curItem = { ...it, base: it.p, qty: 1, removed: [], extras: [], meat: null, mixed: [], sweetOpts: [], selSauces: [], gen: 0, notes: "", needsMeat: it.meat, total: it.p };
@@ -303,7 +311,7 @@
         };
 
         // ==========================================
-        // CARRITO Y GUARDADO
+        // 5. CARRITO Y GUARDADO
         // ==========================================
         function renderCart() {
             const cont = document.getElementById('pos-cart-list'); const totEl = document.getElementById('pos-total');
@@ -315,7 +323,14 @@
                 if(it.meat) dets.push(`<span class="text-orange-700">🥩 ${it.meat === 'Mixto' ? 'Mixto ('+it.mixed.join('+')+')' : it.meat}</span>`);
                 if(it.sweetOpts && it.sweetOpts.length) dets.push(`<span class="text-pink-600 font-bold">🍓 ${it.sweetOpts.join(', ')}</span>`);
                 if(it.selSauces && it.selSauces.length) dets.push(`<span class="text-orange-600 font-bold">🌶️ Salsas: ${it.selSauces.join(', ')}</span>`);
-                if(it.removed && it.removed.length) dets.push(`<span class="text-red-500">❌ Sin: ${it.removed.join(', ')}</span>`);
+                
+                // Lógica de CON TODO en carrito
+                if(it.removed && it.removed.length) {
+                    dets.push(`<span class="text-red-500">❌ Sin: ${it.removed.join(', ')}</span>`);
+                } else if(it.v) {
+                    dets.push(`<span class="text-emerald-600 font-black">✅ CON TODO</span>`);
+                }
+                
                 if(it.extras && it.extras.length) dets.push(`<span class="text-green-600">➕ ${it.extras.map(x=>x.n).join(', ')}</span>`);
                 if(it.gen) dets.push(`<span class="text-purple-600">➕ Extra $10 x${it.gen}</span>`);
                 if(it.notes) dets.push(`<span class="text-blue-500">Nota: ${it.notes}</span>`);
@@ -353,18 +368,15 @@
         window.upStatus = (id, s) => { const idx = localOrders.findIndex(x => x.id === id); if(idx > -1) { localOrders[idx].status = s; localOrders[idx].updatedAt = Date.now(); saveDataLocal(); updateViews(); syncWithGitHub(); } };
         window.cancelOrd = (id) => { if(confirm("¿Seguro que deseas CANCELAR este pedido?")) { upStatus(id, 'c'); } };
 
-        // --- LÓGICA DE BORRADO DEFINITIVO (SOFT DELETE) PARA ÓRDENES Y GASTOS ---
         window.askDel = (id) => { idToDelete = id; document.getElementById('del-pass').value = ''; document.getElementById('modal-password').classList.replace('hidden', 'flex'); };
         window.closePasswordModal = () => { document.getElementById('modal-password').classList.replace('flex', 'hidden'); idToDelete = null; };
         
         window.confirmDelete = () => {
             if (document.getElementById('del-pass').value === ADMIN_PASS) {
                 if(idToDelete.startsWith('exp_')) {
-                    // Borrar gasto
                     const idx = localExpenses.findIndex(e => e.id === idToDelete);
                     if(idx > -1) { localExpenses[idx].status = 'd'; localExpenses[idx].updatedAt = Date.now(); }
                 } else {
-                    // Borrar pedido
                     const idx = localOrders.findIndex(o => o.id === idToDelete);
                     if(idx > -1) { localOrders[idx].status = 'd'; localOrders[idx].updatedAt = Date.now(); }
                 }
@@ -381,7 +393,7 @@
         }
 
         // ==========================================
-        // GITHUB SYNC
+        // 6. MOTOR GITHUB SYNC
         // ==========================================
         window.openConfig = () => document.getElementById('modal-config').classList.replace('hidden', 'flex');
         window.closeConfig = () => document.getElementById('modal-config').classList.replace('flex', 'hidden');
@@ -476,7 +488,6 @@
         function renderControl() {
             const fin = calculateFinances();
             
-            // PANEL DE FINANZAS
             const recentExp = localExpenses.filter(e => e.status !== 'd' && e.date >= new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()).getTime());
             const expListHTML = recentExp.map(e => `<div class="flex justify-between items-center text-[10px] text-slate-500 border-t border-slate-100 pt-2 mt-2"><div class="flex flex-col"><span class="font-bold text-slate-700">${e.desc}</span><span class="text-[9px] text-slate-400"><i class="fa-regular fa-clock"></i> ${e.timeStr || ''}</span></div><span class="text-red-500 font-black text-sm">-$${e.amount}</span></div>`).join('');
 
@@ -486,7 +497,6 @@
                 <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-200 relative overflow-hidden"><div class="absolute -right-4 -top-4 text-6xl text-slate-50 opacity-50"><i class="fa-solid fa-calendar-days"></i></div><h3 class="font-black text-slate-400 uppercase tracking-widest text-xs mb-3 relative z-10">Este Mes</h3><div class="flex justify-between items-center mb-2 relative z-10"><span class="font-bold text-slate-600 text-sm">Ventas Totales</span><span class="font-black text-green-600 text-lg">+$${fin.s.m}</span></div><div class="flex justify-between items-center relative z-10"><span class="font-bold text-slate-600 text-sm">Gastos Totales</span><span class="font-black text-red-500 text-lg">-$${fin.e.m}</span></div><div class="mt-4 pt-4 border-t border-slate-100 flex justify-between items-center relative z-10"><span class="font-black text-slate-800 uppercase tracking-tighter">Neta Mensual</span><span class="font-black text-2xl ${fin.s.m - fin.e.m >= 0 ? 'text-slate-800' : 'text-red-600'}">$${fin.s.m - fin.e.m}</span></div></div>
             `;
 
-            // PANEL DE HISTORIAL (COMBINADO VENTAS Y GASTOS)
             const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
             const histOrders = localOrders.filter(x => (x.status === 'f' || x.status === 'c') && x.created >= sevenDaysAgo).map(o => ({ type: 'o', ts: o.created, ...o }));
             const histExp = localExpenses.filter(x => x.status !== 'd' && x.date >= sevenDaysAgo).map(e => ({ type: 'e', ts: e.date, ...e }));
@@ -522,72 +532,32 @@
             }).join('');
         }
 
-        // --- GENERACIÓN DE PDF ---
         window.generatePDF = () => {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            const fin = calculateFinances();
-
-            // Configuración de estilo
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(22);
-            doc.setTextColor(234, 88, 12); // Naranja Scrappy
+            const { jsPDF } = window.jspdf; const doc = new jsPDF(); const fin = calculateFinances();
+            doc.setFont("helvetica", "bold"); doc.setFontSize(22); doc.setTextColor(234, 88, 12); 
             doc.text("SCRAPPY - BALANCE FINANCIERO", 14, 22);
-
-            doc.setFontSize(10);
-            doc.setFont("helvetica", "normal");
-            doc.setTextColor(100, 100, 100);
+            doc.setFontSize(10); doc.setFont("helvetica", "normal"); doc.setTextColor(100, 100, 100);
             doc.text("Generado el: " + new Date().toLocaleString(), 14, 30);
 
-            // Bloque HOY
-            doc.setFontSize(14); doc.setFont("helvetica", "bold"); doc.setTextColor(40, 40, 40);
-            doc.text("Resumen de Hoy", 14, 45);
-            doc.setFontSize(12); doc.setFont("helvetica", "normal");
-            doc.text(`Ventas Totales: $${fin.s.d}`, 14, 52);
-            doc.text(`Gastos Totales: $${fin.e.d}`, 14, 59);
-            doc.setFont("helvetica", "bold");
-            doc.text(`Ganancia Neta: $${fin.s.d - fin.e.d}`, 14, 66);
+            doc.setFontSize(14); doc.setFont("helvetica", "bold"); doc.setTextColor(40, 40, 40); doc.text("Resumen de Hoy", 14, 45);
+            doc.setFontSize(12); doc.setFont("helvetica", "normal"); doc.text(`Ventas Totales: $${fin.s.d}`, 14, 52); doc.text(`Gastos Totales: $${fin.e.d}`, 14, 59);
+            doc.setFont("helvetica", "bold"); doc.text(`Ganancia Neta: $${fin.s.d - fin.e.d}`, 14, 66);
 
-            // Bloque SEMANA
-            doc.setFontSize(14); doc.setFont("helvetica", "bold");
-            doc.text("Resumen Semanal", 14, 80);
-            doc.setFontSize(12); doc.setFont("helvetica", "normal");
-            doc.text(`Ventas Totales: $${fin.s.w}`, 14, 87);
-            doc.text(`Gastos Totales: $${fin.e.w}`, 14, 94);
-            doc.setFont("helvetica", "bold");
-            doc.text(`Ganancia Neta: $${fin.s.w - fin.e.w}`, 14, 101);
+            doc.setFontSize(14); doc.setFont("helvetica", "bold"); doc.text("Resumen Semanal", 14, 80);
+            doc.setFontSize(12); doc.setFont("helvetica", "normal"); doc.text(`Ventas Totales: $${fin.s.w}`, 14, 87); doc.text(`Gastos Totales: $${fin.e.w}`, 14, 94);
+            doc.setFont("helvetica", "bold"); doc.text(`Ganancia Neta: $${fin.s.w - fin.e.w}`, 14, 101);
 
-            // Bloque MES
-            doc.setFontSize(14); doc.setFont("helvetica", "bold");
-            doc.text("Resumen Mensual", 14, 115);
-            doc.setFontSize(12); doc.setFont("helvetica", "normal");
-            doc.text(`Ventas Totales: $${fin.s.m}`, 14, 122);
-            doc.text(`Gastos Totales: $${fin.e.m}`, 14, 129);
-            doc.setFont("helvetica", "bold");
-            doc.text(`Ganancia Neta: $${fin.s.m - fin.e.m}`, 14, 136);
+            doc.setFontSize(14); doc.setFont("helvetica", "bold"); doc.text("Resumen Mensual", 14, 115);
+            doc.setFontSize(12); doc.setFont("helvetica", "normal"); doc.text(`Ventas Totales: $${fin.s.m}`, 14, 122); doc.text(`Gastos Totales: $${fin.e.m}`, 14, 129);
+            doc.setFont("helvetica", "bold"); doc.text(`Ganancia Neta: $${fin.s.m - fin.e.m}`, 14, 136);
 
-            // Tabla de Gastos de la semana
             doc.setFontSize(14); doc.text("Desglose de Gastos de la Semana", 14, 155);
-
             const startOfWeek = getStartOfCustomWeek(new Date());
-            const weeklyExpenses = localExpenses.filter(e => e.status !== 'd' && e.date >= startOfWeek).map(e => [
-                new Date(e.date).toLocaleDateString() + ' ' + (e.timeStr || ''),
-                e.desc,
-                `$${e.amount}`
-            ]);
+            const weeklyExpenses = localExpenses.filter(e => e.status !== 'd' && e.date >= startOfWeek).map(e => [ new Date(e.date).toLocaleDateString() + ' ' + (e.timeStr || ''), e.desc, `$${e.amount}` ]);
 
             if(weeklyExpenses.length > 0) {
-                doc.autoTable({
-                    startY: 160,
-                    head: [['Fecha y Hora', 'Descripción del Gasto', 'Monto']],
-                    body: weeklyExpenses,
-                    theme: 'striped',
-                    headStyles: { fillColor: [234, 88, 12] }
-                });
-            } else {
-                doc.setFontSize(10); doc.setFont("helvetica", "italic");
-                doc.text("No se registraron gastos esta semana.", 14, 162);
-            }
+                doc.autoTable({ startY: 160, head: [['Fecha y Hora', 'Descripción del Gasto', 'Monto']], body: weeklyExpenses, theme: 'striped', headStyles: { fillColor: [234, 88, 12] } });
+            } else { doc.setFontSize(10); doc.setFont("helvetica", "italic"); doc.text("No se registraron gastos esta semana.", 14, 162); }
 
             doc.save(`Scrappy_Balance_${new Date().toLocaleDateString().replace(/\//g, '-')}.pdf`);
         };
@@ -617,7 +587,7 @@
                                 ${i.meat ? `<p class="text-orange-700">🥩 ${i.meat === 'Mixto' ? 'Mixto ('+i.mixed.join('+')+')' : i.meat}</p>` : ''}
                                 ${i.sweetOpts && i.sweetOpts.length ? `<p class="text-pink-600">🍓 ING: ${i.sweetOpts.join(', ')}</p>` : ''}
                                 ${i.selSauces && i.selSauces.length ? `<p class="text-orange-600">🌶️ SALSAS: ${i.selSauces.join(', ')}</p>` : ''}
-                                ${i.removed && i.removed.length ? `<p class="text-red-500">❌ Sin: ${i.removed.join(', ')}</p>` : ''}
+                                ${i.removed && i.removed.length ? `<p class="text-red-500">❌ Sin: ${i.removed.join(', ')}</p>` : (i.v ? `<p class="text-emerald-600 font-black">✅ CON TODO</p>` : '')}
                                 ${i.extras && i.extras.length ? `<p class="text-green-600">➕ Con: ${i.extras.map(x=>x.n).join(', ')}</p>` : ''}
                                 ${i.gen ? `<p class="text-purple-600">➕ Extras Gen: x${i.gen}</p>` : ''}
                                 ${i.notes ? `<p class="text-blue-500 underline">Nota: ${i.notes}</p>` : ''}
@@ -641,7 +611,7 @@
                     
                     <button onclick="document.getElementById('det-${o.id}').classList.toggle('hidden')" class="w-full bg-white text-slate-500 font-black py-3 rounded-2xl text-[10px] uppercase tracking-widest mb-4 active:scale-95 transition-transform flex justify-center items-center gap-2 border-2 border-slate-100 shadow-sm"><i class="fa-solid fa-list"></i> Ver / Ocultar Pedido</button>
                     <div id="det-${o.id}" class="hidden bg-slate-50 p-4 rounded-2xl mb-4 border border-slate-200 space-y-3 shadow-inner">
-                        ${o.cart.map(i => `<div><div class="font-black text-sm text-slate-800 leading-tight">${i.qty}x ${i.n}</div><div class="text-[10px] font-bold text-slate-500 uppercase mt-1 italic space-y-1">${i.meat ? `<p class="text-orange-700">🥩 ${i.meat === 'Mixto' ? 'Mixto ('+i.mixed.join('+')+')' : i.meat}</p>` : ''}${i.sweetOpts && i.sweetOpts.length ? `<p class="text-pink-600">🍓 ING: ${i.sweetOpts.join(', ')}</p>` : ''}${i.selSauces && i.selSauces.length ? `<p class="text-orange-600">🌶️ SALSAS: ${i.selSauces.join(', ')}</p>` : ''}${i.removed && i.removed.length ? `<p class="text-red-500">❌ Sin: ${i.removed.join(', ')}</p>` : ''}${i.extras && i.extras.length ? `<p class="text-green-600">➕ Con: ${i.extras.map(x=>x.n).join(', ')}</p>` : ''}${i.gen ? `<p class="text-purple-600">➕ Extras Gen: x${i.gen}</p>` : ''}${i.notes ? `<p class="text-blue-500 underline">Nota: ${i.notes}</p>` : ''}</div></div>`).join('<hr class="border-slate-200 my-2">')}
+                        ${o.cart.map(i => `<div><div class="font-black text-sm text-slate-800 leading-tight">${i.qty}x ${i.n}</div><div class="text-[10px] font-bold text-slate-500 uppercase mt-1 italic space-y-1">${i.meat ? `<p class="text-orange-700">🥩 ${i.meat === 'Mixto' ? 'Mixto ('+i.mixed.join('+')+')' : i.meat}</p>` : ''}${i.sweetOpts && i.sweetOpts.length ? `<p class="text-pink-600">🍓 ING: ${i.sweetOpts.join(', ')}</p>` : ''}${i.selSauces && i.selSauces.length ? `<p class="text-orange-600">🌶️ SALSAS: ${i.selSauces.join(', ')}</p>` : ''}${i.removed && i.removed.length ? `<p class="text-red-500">❌ Sin: ${i.removed.join(', ')}</p>` : (i.v ? `<p class="text-emerald-600 font-black">✅ CON TODO</p>` : '')}${i.extras && i.extras.length ? `<p class="text-green-600">➕ Con: ${i.extras.map(x=>x.n).join(', ')}</p>` : ''}${i.gen ? `<p class="text-purple-600">➕ Extras Gen: x${i.gen}</p>` : ''}${i.notes ? `<p class="text-blue-500 underline">Nota: ${i.notes}</p>` : ''}</div></div>`).join('<hr class="border-slate-200 my-2">')}
                     </div>
 
                     ${o.phone ? `<div class="grid grid-cols-2 gap-3 mb-4"><a href="tel:${o.phone}" class="bg-blue-50 text-blue-600 font-black py-4 rounded-2xl flex flex-col items-center shadow-sm active:scale-95 border border-blue-100"><i class="fa-solid fa-phone text-xl mb-1"></i><span class="text-[9px] uppercase tracking-widest">Llamar</span></a><a href="https://wa.me/52${o.phone.replace(/\D/g,'')}" target="_blank" class="bg-green-50 text-green-600 font-black py-4 rounded-2xl flex flex-col items-center shadow-sm active:scale-95 border border-green-100"><i class="fa-brands fa-whatsapp text-xl mb-1"></i><span class="text-[9px] uppercase tracking-widest">WhatsApp</span></a></div>` : ''}
@@ -651,8 +621,7 @@
                     </div>
                 </div>`).join('');
             
-            renderControl();
-            updateClocks();
+            renderControl(); updateClocks();
         }
 
         function updateClocks() { document.querySelectorAll('.clock').forEach(el => { const s = parseInt(el.getAttribute('data-start')); const diff = Math.floor((Date.now() - s) / 1000); const m = Math.floor(diff / 60).toString().padStart(2, '0'); const sc = (diff % 60).toString().padStart(2, '0'); el.innerText = `⏱️ ${m}:${sc}`; if(diff > 900) el.classList.add('timer-alert'); }); }
@@ -660,12 +629,10 @@
         window.switchTab = (t) => { 
             ['pos', 'kitchen', 'delivery', 'control'].forEach(n => { 
                 document.getElementById('view-'+n).classList.add('hidden'); 
-                document.getElementById('btn-'+n).classList.remove('tab-active');
-                document.getElementById('btn-'+n).classList.add('tab-inactive');
+                document.getElementById('btn-'+n).classList.remove('tab-active'); document.getElementById('btn-'+n).classList.add('tab-inactive');
             }); 
             document.getElementById('view-'+t).classList.remove('hidden'); 
-            document.getElementById('btn-'+t).classList.remove('tab-inactive');
-            document.getElementById('btn-'+t).classList.add('tab-active');
+            document.getElementById('btn-'+t).classList.remove('tab-inactive'); document.getElementById('btn-'+t).classList.add('tab-active');
         };
 
         initUI();
