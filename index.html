@@ -6,6 +6,10 @@
     <title>Scrappy POS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Librerías para exportar a PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    
     <style>
         body { user-select: none; -webkit-user-select: none; background-color: #f8fafc; font-family: ui-sans-serif, system-ui, sans-serif; }
         input, textarea { user-select: text; -webkit-user-select: text; }
@@ -84,11 +88,14 @@
             <div id="delivery-list" class="space-y-4 pb-10"></div>
         </section>
 
-        <!-- VISTA CONTROL Y FINANZAS -->
+        <!-- VISTA CONTROL -->
         <section id="view-control" class="p-4 hidden bg-slate-100 min-h-full">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-xl font-black text-slate-800 uppercase italic tracking-tighter"><span class="text-2xl">📊</span> Control</h2>
-                <button onclick="openExpense()" class="bg-slate-800 text-white font-black text-xs px-4 py-2 rounded-xl uppercase tracking-widest shadow-md active:scale-95 transition-transform"><i class="fa-solid fa-plus"></i> Gasto</button>
+                <div class="flex gap-2">
+                    <button onclick="generatePDF()" class="bg-slate-300 text-slate-800 font-black text-xs px-4 py-2 rounded-xl uppercase tracking-widest shadow-md active:scale-95 transition-transform"><i class="fa-solid fa-file-pdf text-red-600"></i> PDF</button>
+                    <button onclick="openExpense()" class="bg-slate-800 text-white font-black text-xs px-4 py-2 rounded-xl uppercase tracking-widest shadow-md active:scale-95 transition-transform"><i class="fa-solid fa-plus"></i> Gasto</button>
+                </div>
             </div>
 
             <!-- Toggles de Sub-pestañas -->
@@ -119,13 +126,15 @@
         </div>
     </div>
 
-    <!-- Modal Contraseña para Borrar -->
+    <!-- Modal Contraseña -->
     <div id="modal-password" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm hidden justify-center items-center z-[80] p-4">
         <div class="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl animate-[slideIn_0.2s_ease-out] text-center">
             <div class="text-4xl text-red-500 mb-3"><i class="fa-solid fa-lock"></i></div>
-            <h3 class="text-xl font-black text-slate-800 mb-2 uppercase italic tracking-tighter">Eliminar Pedido</h3>
-            <p class="text-xs text-slate-500 mb-6">Ingresa la contraseña de administrador para borrar el registro permanentemente.</p>
-            <input type="password" id="del-pass" placeholder="Contraseña" class="w-full p-4 bg-slate-50 border rounded-xl font-black text-xl text-center text-slate-800 outline-none focus:border-red-500 mb-6 tracking-[0.5em]">
+            <h3 class="text-xl font-black text-slate-800 mb-2 uppercase italic tracking-tighter">Eliminar Registro</h3>
+            <p class="text-xs text-slate-500 mb-6">Ingresa la contraseña de administrador para borrar permanentemente.</p>
+            
+            <input type="password" inputmode="numeric" pattern="[0-9]*" id="del-pass" placeholder="Contraseña" class="w-full p-4 bg-slate-50 border rounded-xl font-black text-2xl text-center text-slate-800 outline-none focus:border-red-500 mb-6 tracking-[0.5em]">
+            
             <div class="flex gap-3">
                 <button onclick="closePasswordModal()" class="flex-1 bg-slate-100 text-slate-500 font-black py-4 rounded-xl uppercase text-xs">Cancelar</button>
                 <button onclick="confirmDelete()" class="flex-1 bg-red-600 text-white font-black py-4 rounded-xl uppercase text-sm shadow-lg active:scale-95 transition-transform">Eliminar</button>
@@ -191,9 +200,9 @@
 
     <script>
         // ==========================================
-        // 1. CONFIGURACIÓN Y DATOS DE MENÚ
+        // 1. CONFIGURACIÓN GENERAL
         // ==========================================
-        const ADMIN_PASS = "1234"; // <-- CAMBIA ESTA CONTRASEÑA SI GUSTAS
+        const ADMIN_PASS = "58654"; // NUEVA CONTRASEÑA
 
         const menu = [
             { cat: "Hamb. Res", icon: "🍔", items: [ { id: 'r1', n: "Scrappy Clasica", p: 60, v: 'burger', e: true }, { id: 'r2', n: "Tocino Crunch", p: 70, v: 'burger', e: true }, { id: 'r3', n: "Double Cheese Chipotle", p: 75, v: 'burger', e: true }, { id: 'r4', n: "Big Scrappy", p: 80, v: 'burger', e: true } ] },
@@ -210,9 +219,6 @@
         const MEATS = ["Pierna", "Jamón", "Pollo", "Mixto"];
         const SWEETS = ["Fresa", "Manzana", "Plátano", "Chocolate", "Lechera", "Miel de Maple"];
 
-        // ==========================================
-        // 2. ESTADO GLOBAL
-        // ==========================================
         let cart = []; let curItem = null; let editId = null; let idToDelete = null;
         let localOrders = JSON.parse(localStorage.getItem('scrappy_db')) || [];
         let localExpenses = JSON.parse(localStorage.getItem('scrappy_exp')) || []; 
@@ -220,7 +226,7 @@
         let ghSha = null; let isSyncing = false;
 
         // ==========================================
-        // 3. UI PRINCIPAL Y WHATSAPP
+        // UI PRINCIPAL Y WHATSAPP
         // ==========================================
         function initUI() {
             const catGrid = document.getElementById('pos-categories');
@@ -257,7 +263,7 @@
         };
 
         // ==========================================
-        // 4. MODALES POS Y LÓGICA DE PERSONALIZACIÓN
+        // MODALES POS Y LÓGICA DE PERSONALIZACIÓN
         // ==========================================
         window.openM = (it) => {
             curItem = { ...it, base: it.p, qty: 1, removed: [], extras: [], meat: null, mixed: [], sweetOpts: [], selSauces: [], gen: 0, notes: "", needsMeat: it.meat, total: it.p };
@@ -271,25 +277,19 @@
         };
 
         window.closeModal = () => document.getElementById('modal').classList.replace('flex', 'hidden');
-
         function getVegList() { return curItem.v === 'hotdog' ? VEG_HOTDOG : VEG_BURGER; }
         function renderVeg() { const list = getVegList(); document.getElementById('veg-grid').innerHTML = list.map(v => `<button onclick="togVeg('${v}')" class="px-4 py-2 border-2 border-slate-200 rounded-xl text-xs font-black text-slate-400 active:scale-95 transition-all ${curItem.removed.includes(v) ? 'bg-red-50 border-red-500 text-red-500' : 'bg-white'}">Sin ${v}</button>`).join(''); }
         window.togVeg = (v) => { const idx = curItem.removed.indexOf(v); idx === -1 ? curItem.removed.push(v) : curItem.removed.splice(idx, 1); renderVeg(); };
-        
         function renderExt() { document.getElementById('ext-grid').innerHTML = EXT.map((e, i) => `<button onclick="togExt(${i})" class="px-4 py-2 border-2 border-slate-200 rounded-xl text-xs font-black text-slate-400 active:scale-95 transition-all ${curItem.extras.find(x=>x.n===e.n) ? 'bg-green-50 border-green-500 text-green-600' : 'bg-white'}">+ ${e.n} ($${e.p})</button>`).join(''); }
         window.togExt = (i) => { const e = EXT[i]; const idx = curItem.extras.findIndex(x => x.n === e.n); idx === -1 ? curItem.extras.push(e) : curItem.extras.splice(idx, 1); renderExt(); calcM(); };
-        
         function renderMeat() { document.getElementById('meat-grid').innerHTML = MEATS.map(m => `<label class="cursor-pointer"><input type="radio" name="m" class="hidden btn-meat" ${curItem.meat === m ? 'checked' : ''} onchange="setMeat('${m}')"><div class="border-2 border-slate-200 rounded-2xl p-4 text-center text-xs font-black text-slate-500 transition-all uppercase">${m}</div></label>`).join(''); }
         window.setMeat = (m) => { curItem.meat = m; curItem.base = m === 'Mixto' ? 50 : curItem.p; const mixSec = document.getElementById('m-mixed-opts'); m === 'Mixto' ? (mixSec.classList.remove('hidden'), renderMixed()) : (mixSec.classList.add('hidden'), curItem.mixed=[]); calcM(); };
         function renderMixed() { const opts = ["Pierna", "Jamón", "Pollo"]; document.getElementById('mixed-grid').innerHTML = opts.map(o => `<label class="flex-1 cursor-pointer"><input type="checkbox" class="hidden btn-meat" ${curItem.mixed.includes(o) ? 'checked' : ''} onchange="togMix('${o}')"><div class="border-2 border-orange-200 bg-white rounded-xl p-3 text-center text-[10px] font-black text-orange-600 uppercase transition-all">${o}</div></label>`).join(''); }
         window.togMix = (o) => { const idx = curItem.mixed.indexOf(o); if(idx === -1) { if(curItem.mixed.length >= 2) return alert("Solo 2 carnes!"); curItem.mixed.push(o); } else { curItem.mixed.splice(idx, 1); } renderMixed(); };
-        
         function renderSweet() { document.getElementById('sweet-grid').innerHTML = SWEETS.map(s => `<label class="cursor-pointer w-full"><input type="checkbox" class="hidden btn-sweet" ${curItem.sweetOpts.includes(s) ? 'checked' : ''} onchange="togSweet('${s}')"><div class="border-2 border-slate-200 bg-white rounded-2xl p-3 text-center text-xs font-black text-slate-500 uppercase transition-all">${s}</div></label>`).join(''); }
-        window.togSweet = (s) => { const idx = curItem.sweetOpts.indexOf(s); if (idx === -1) { if (curItem.sweetOpts.length >= 3) return alert("Límite de 3 ingredientes superado."); curItem.sweetOpts.push(s); } else { curItem.sweetOpts.splice(idx, 1); } renderSweet(); };
-
+        window.togSweet = (s) => { const idx = curItem.sweetOpts.indexOf(s); if (idx === -1) { if (curItem.sweetOpts.length >= 3) return alert("Límite superado."); curItem.sweetOpts.push(s); } else { curItem.sweetOpts.splice(idx, 1); } renderSweet(); };
         function renderSauces() { document.getElementById('sauce-grid').innerHTML = SAUCES.map(s => `<label class="cursor-pointer w-full"><input type="checkbox" class="hidden btn-sauce" ${curItem.selSauces.includes(s) ? 'checked' : ''} onchange="togSauce('${s}')"><div class="border-2 border-slate-200 bg-white rounded-2xl p-3 text-center text-xs font-black text-slate-500 uppercase transition-all">${s}</div></label>`).join(''); }
         window.togSauce = (s) => { const idx = curItem.selSauces.indexOf(s); if (idx === -1) { if (curItem.selSauces.length >= 2) return alert(`Máximo 2 aderezos.`); curItem.selSauces.push(s); } else { curItem.selSauces.splice(idx, 1); } renderSauces(); };
-
         window.changeGenExt = (v) => { if(curItem.gen+v >= 0) curItem.gen += v; document.getElementById('m-gen-val').innerText = curItem.gen; calcM(); };
         window.changeQty = (v) => { if(curItem.qty+v >= 1) curItem.qty += v; document.getElementById('m-qty').innerText = curItem.qty; calcM(); };
         function calcM() { let u = curItem.base; curItem.extras.forEach(x => u += x.p); u += (curItem.gen * 10); curItem.total = u * curItem.qty; document.getElementById('m-price').innerText = curItem.total; }
@@ -303,7 +303,7 @@
         };
 
         // ==========================================
-        // 5. CARRITO Y GUARDADO
+        // CARRITO Y GUARDADO
         // ==========================================
         function renderCart() {
             const cont = document.getElementById('pos-cart-list'); const totEl = document.getElementById('pos-total');
@@ -351,23 +351,25 @@
         };
 
         window.upStatus = (id, s) => { const idx = localOrders.findIndex(x => x.id === id); if(idx > -1) { localOrders[idx].status = s; localOrders[idx].updatedAt = Date.now(); saveDataLocal(); updateViews(); syncWithGitHub(); } };
-        
-        // --- AQUÍ APLICAMOS EL SOFT DELETE (BORRADO LÓGICO) PARA QUE GITHUB NO LO RESUCITE ---
         window.cancelOrd = (id) => { if(confirm("¿Seguro que deseas CANCELAR este pedido?")) { upStatus(id, 'c'); } };
+
+        // --- LÓGICA DE BORRADO DEFINITIVO (SOFT DELETE) PARA ÓRDENES Y GASTOS ---
         window.askDel = (id) => { idToDelete = id; document.getElementById('del-pass').value = ''; document.getElementById('modal-password').classList.replace('hidden', 'flex'); };
         window.closePasswordModal = () => { document.getElementById('modal-password').classList.replace('flex', 'hidden'); idToDelete = null; };
         
         window.confirmDelete = () => {
             if (document.getElementById('del-pass').value === ADMIN_PASS) {
-                const idx = localOrders.findIndex(o => o.id === idToDelete);
-                if(idx > -1) {
-                    localOrders[idx].status = 'd'; // 'd' es de Deleted (Oculto). Así GitHub sabrá que se borró y no lo regresará.
-                    localOrders[idx].updatedAt = Date.now();
+                if(idToDelete.startsWith('exp_')) {
+                    // Borrar gasto
+                    const idx = localExpenses.findIndex(e => e.id === idToDelete);
+                    if(idx > -1) { localExpenses[idx].status = 'd'; localExpenses[idx].updatedAt = Date.now(); }
+                } else {
+                    // Borrar pedido
+                    const idx = localOrders.findIndex(o => o.id === idToDelete);
+                    if(idx > -1) { localOrders[idx].status = 'd'; localOrders[idx].updatedAt = Date.now(); }
                 }
                 saveDataLocal(); updateViews(); syncWithGitHub(); closePasswordModal();
-            } else {
-                alert("Contraseña incorrecta.");
-            }
+            } else { alert("Contraseña incorrecta."); }
         };
 
         function saveDataLocal() { 
@@ -379,7 +381,7 @@
         }
 
         // ==========================================
-        // 6. MOTOR GITHUB SYNC
+        // GITHUB SYNC
         // ==========================================
         window.openConfig = () => document.getElementById('modal-config').classList.replace('hidden', 'flex');
         window.closeConfig = () => document.getElementById('modal-config').classList.replace('flex', 'hidden');
@@ -427,7 +429,7 @@
         }
 
         // ==========================================
-        // 7. LÓGICA DE CONTROL (FINANZAS E HISTORIAL)
+        // 7. LÓGICA DE CONTROL (FINANZAS, HISTORIAL Y PDF)
         // ==========================================
         window.switchControlTab = (tab) => {
             if(tab === 'finanzas') {
@@ -448,7 +450,7 @@
             const amt = parseFloat(document.getElementById('exp-amount').value);
             const desc = document.getElementById('exp-desc').value.trim() || 'Gasto General';
             if (isNaN(amt) || amt <= 0) return alert("Ingresa un monto válido");
-            localExpenses.push({ id: 'exp_' + Date.now() + '_' + Math.floor(Math.random()*100), amount: amt, desc: desc, date: Date.now(), timeStr: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}), updatedAt: Date.now() });
+            localExpenses.push({ id: 'exp_' + Date.now() + '_' + Math.floor(Math.random()*100), status: 'a', amount: amt, desc: desc, date: Date.now(), timeStr: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}), updatedAt: Date.now() });
             saveDataLocal(); closeExpense(); updateViews(); syncWithGitHub();
         };
 
@@ -465,7 +467,7 @@
             localOrders.filter(o => o.status === 'f').forEach(o => {
                 if (o.created >= today) s.d += o.total; if (o.created >= startOfWeek) s.w += o.total; if (o.created >= startOfMonth) s.m += o.total;
             });
-            localExpenses.forEach(exp => {
+            localExpenses.filter(exp => exp.status !== 'd').forEach(exp => {
                 if (exp.date >= today) e.d += exp.amount; if (exp.date >= startOfWeek) e.w += exp.amount; if (exp.date >= startOfMonth) e.m += exp.amount;
             });
             return { s, e };
@@ -473,7 +475,9 @@
 
         function renderControl() {
             const fin = calculateFinances();
-            const recentExp = localExpenses.filter(e => e.date >= new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()).getTime());
+            
+            // PANEL DE FINANZAS
+            const recentExp = localExpenses.filter(e => e.status !== 'd' && e.date >= new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()).getTime());
             const expListHTML = recentExp.map(e => `<div class="flex justify-between items-center text-[10px] text-slate-500 border-t border-slate-100 pt-2 mt-2"><div class="flex flex-col"><span class="font-bold text-slate-700">${e.desc}</span><span class="text-[9px] text-slate-400"><i class="fa-regular fa-clock"></i> ${e.timeStr || ''}</span></div><span class="text-red-500 font-black text-sm">-$${e.amount}</span></div>`).join('');
 
             document.getElementById('control-dashboard').innerHTML = `
@@ -482,26 +486,111 @@
                 <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-200 relative overflow-hidden"><div class="absolute -right-4 -top-4 text-6xl text-slate-50 opacity-50"><i class="fa-solid fa-calendar-days"></i></div><h3 class="font-black text-slate-400 uppercase tracking-widest text-xs mb-3 relative z-10">Este Mes</h3><div class="flex justify-between items-center mb-2 relative z-10"><span class="font-bold text-slate-600 text-sm">Ventas Totales</span><span class="font-black text-green-600 text-lg">+$${fin.s.m}</span></div><div class="flex justify-between items-center relative z-10"><span class="font-bold text-slate-600 text-sm">Gastos Totales</span><span class="font-black text-red-500 text-lg">-$${fin.e.m}</span></div><div class="mt-4 pt-4 border-t border-slate-100 flex justify-between items-center relative z-10"><span class="font-black text-slate-800 uppercase tracking-tighter">Neta Mensual</span><span class="font-black text-2xl ${fin.s.m - fin.e.m >= 0 ? 'text-slate-800' : 'text-red-600'}">$${fin.s.m - fin.e.m}</span></div></div>
             `;
 
-            // RENDER HISTORIAL: Filtra para que NO salgan los destruidos ('d')
+            // PANEL DE HISTORIAL (COMBINADO VENTAS Y GASTOS)
             const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
-            const hist = localOrders.filter(x => (x.status === 'f' || x.status === 'c') && x.created >= sevenDaysAgo).sort((a,b) => b.created - a.created);
+            const histOrders = localOrders.filter(x => (x.status === 'f' || x.status === 'c') && x.created >= sevenDaysAgo).map(o => ({ type: 'o', ts: o.created, ...o }));
+            const histExp = localExpenses.filter(x => x.status !== 'd' && x.date >= sevenDaysAgo).map(e => ({ type: 'e', ts: e.date, ...e }));
             
-            document.getElementById('control-history').innerHTML = !hist.length ? `<div class="text-center text-slate-300 py-10 font-black uppercase tracking-widest">Sin historial reciente</div>` : hist.map(o => `
-                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 relative mb-3">
-                    <div class="flex justify-between items-start mb-2">
-                        <div>
-                            <h4 class="font-black text-slate-800 uppercase italic">${o.customer}</h4>
-                            <span class="text-[10px] font-bold text-slate-400">${new Date(o.created).toLocaleDateString()} ${o.timeStr}</span>
+            const combinedHist = [...histOrders, ...histExp].sort((a,b) => b.ts - a.ts);
+            
+            document.getElementById('control-history').innerHTML = !combinedHist.length ? `<div class="text-center text-slate-300 py-10 font-black uppercase tracking-widest">Sin historial reciente</div>` : combinedHist.map(item => {
+                if(item.type === 'o') {
+                    return `
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 relative mb-3">
+                        <div class="flex justify-between items-start mb-2">
+                            <div><h4 class="font-black text-slate-800 uppercase italic">${item.customer}</h4><span class="text-[10px] font-bold text-slate-400">${new Date(item.created).toLocaleDateString()} ${item.timeStr}</span></div>
+                            <span class="font-black text-lg ${item.status === 'c' ? 'text-red-500 line-through' : 'text-green-600'}">$${item.total}</span>
                         </div>
-                        <span class="font-black text-lg ${o.status === 'c' ? 'text-red-500 line-through' : 'text-green-600'}">$${o.total}</span>
-                    </div>
-                    <div class="flex justify-between items-center mt-3 pt-3 border-t border-slate-100">
-                        <span class="text-[10px] font-black uppercase px-2 py-1 rounded ${o.status === 'c' ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}">${o.status === 'c' ? 'Cancelado' : 'Entregado'}</span>
-                        <button onclick="askDel('${o.id}')" class="text-slate-400 active:text-red-500 transition-colors p-2"><i class="fa-solid fa-trash"></i></button>
-                    </div>
-                </div>
-            `).join('');
+                        <div class="flex justify-between items-center mt-3 pt-3 border-t border-slate-100">
+                            <span class="text-[10px] font-black uppercase px-2 py-1 rounded ${item.status === 'c' ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}">${item.status === 'c' ? 'Cancelado' : 'Entregado'}</span>
+                            <button onclick="askDel('${item.id}')" class="text-slate-400 active:text-red-500 transition-colors p-2"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>`;
+                } else {
+                    return `
+                    <div class="bg-slate-50 p-4 rounded-2xl shadow-sm border border-slate-200 relative mb-3">
+                        <div class="flex justify-between items-start mb-2">
+                            <div><h4 class="font-black text-slate-600 uppercase italic"><i class="fa-solid fa-money-bill-wave text-red-400 mr-1"></i> ${item.desc}</h4><span class="text-[10px] font-bold text-slate-400">${new Date(item.date).toLocaleDateString()} ${item.timeStr}</span></div>
+                            <span class="font-black text-lg text-red-500">-$${item.amount}</span>
+                        </div>
+                        <div class="flex justify-between items-center mt-3 pt-3 border-t border-slate-200">
+                            <span class="text-[10px] font-black uppercase px-2 py-1 rounded bg-slate-200 text-slate-500">Gasto Registrado</span>
+                            <button onclick="askDel('${item.id}')" class="text-slate-400 active:text-red-500 transition-colors p-2"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>`;
+                }
+            }).join('');
         }
+
+        // --- GENERACIÓN DE PDF ---
+        window.generatePDF = () => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const fin = calculateFinances();
+
+            // Configuración de estilo
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(22);
+            doc.setTextColor(234, 88, 12); // Naranja Scrappy
+            doc.text("SCRAPPY - BALANCE FINANCIERO", 14, 22);
+
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "normal");
+            doc.setTextColor(100, 100, 100);
+            doc.text("Generado el: " + new Date().toLocaleString(), 14, 30);
+
+            // Bloque HOY
+            doc.setFontSize(14); doc.setFont("helvetica", "bold"); doc.setTextColor(40, 40, 40);
+            doc.text("Resumen de Hoy", 14, 45);
+            doc.setFontSize(12); doc.setFont("helvetica", "normal");
+            doc.text(`Ventas Totales: $${fin.s.d}`, 14, 52);
+            doc.text(`Gastos Totales: $${fin.e.d}`, 14, 59);
+            doc.setFont("helvetica", "bold");
+            doc.text(`Ganancia Neta: $${fin.s.d - fin.e.d}`, 14, 66);
+
+            // Bloque SEMANA
+            doc.setFontSize(14); doc.setFont("helvetica", "bold");
+            doc.text("Resumen Semanal", 14, 80);
+            doc.setFontSize(12); doc.setFont("helvetica", "normal");
+            doc.text(`Ventas Totales: $${fin.s.w}`, 14, 87);
+            doc.text(`Gastos Totales: $${fin.e.w}`, 14, 94);
+            doc.setFont("helvetica", "bold");
+            doc.text(`Ganancia Neta: $${fin.s.w - fin.e.w}`, 14, 101);
+
+            // Bloque MES
+            doc.setFontSize(14); doc.setFont("helvetica", "bold");
+            doc.text("Resumen Mensual", 14, 115);
+            doc.setFontSize(12); doc.setFont("helvetica", "normal");
+            doc.text(`Ventas Totales: $${fin.s.m}`, 14, 122);
+            doc.text(`Gastos Totales: $${fin.e.m}`, 14, 129);
+            doc.setFont("helvetica", "bold");
+            doc.text(`Ganancia Neta: $${fin.s.m - fin.e.m}`, 14, 136);
+
+            // Tabla de Gastos de la semana
+            doc.setFontSize(14); doc.text("Desglose de Gastos de la Semana", 14, 155);
+
+            const startOfWeek = getStartOfCustomWeek(new Date());
+            const weeklyExpenses = localExpenses.filter(e => e.status !== 'd' && e.date >= startOfWeek).map(e => [
+                new Date(e.date).toLocaleDateString() + ' ' + (e.timeStr || ''),
+                e.desc,
+                `$${e.amount}`
+            ]);
+
+            if(weeklyExpenses.length > 0) {
+                doc.autoTable({
+                    startY: 160,
+                    head: [['Fecha y Hora', 'Descripción del Gasto', 'Monto']],
+                    body: weeklyExpenses,
+                    theme: 'striped',
+                    headStyles: { fillColor: [234, 88, 12] }
+                });
+            } else {
+                doc.setFontSize(10); doc.setFont("helvetica", "italic");
+                doc.text("No se registraron gastos esta semana.", 14, 162);
+            }
+
+            doc.save(`Scrappy_Balance_${new Date().toLocaleDateString().replace(/\//g, '-')}.pdf`);
+        };
 
         // ==========================================
         // VISTAS DE COCINA Y REPARTO
