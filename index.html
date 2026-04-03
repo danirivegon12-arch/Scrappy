@@ -6,7 +6,6 @@
     <title>Scrappy POS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- Librerías para exportar a PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     
@@ -78,7 +77,8 @@
                         <div id="autocomplete-list" class="absolute z-50 w-full bg-white rounded-xl shadow-2xl border border-slate-200 mt-1 hidden max-h-48 overflow-y-auto"></div>
                     </div>
 
-                    <input type="text" id="cust-addr" placeholder="Dirección o 'Local' *" class="w-full p-4 bg-slate-700 text-white placeholder-slate-400 border border-slate-600 rounded-2xl focus:ring-2 focus:ring-orange-500 outline-none font-bold">
+                    <!-- NUEVO: oninput actualizará el ETA al detectar la palabra "local" -->
+                    <input type="text" id="cust-addr" oninput="updatePOS_ETA()" placeholder="Dirección o 'Local' *" class="w-full p-4 bg-slate-700 text-white placeholder-slate-400 border border-slate-600 rounded-2xl focus:ring-2 focus:ring-orange-500 outline-none font-bold">
                     <input type="tel" id="cust-phone" placeholder="Celular (Opcional)" class="w-full p-4 bg-slate-700 text-white placeholder-slate-400 border border-slate-600 rounded-2xl focus:ring-2 focus:ring-orange-500 outline-none font-bold">
                 </div>
                 <button onclick="saveOrder()" id="btn-save" class="w-full bg-orange-600 text-white font-black text-xl py-5 rounded-2xl shadow-xl active:scale-95 transition-transform flex justify-center items-center gap-3 uppercase italic tracking-widest">
@@ -252,7 +252,7 @@
         let ghSha = null; let isSyncing = false;
 
         // ==========================================
-        // ALGORITMO DE TIEMPO (ETA) CORREGIDO
+        // ALGORITMO DE TIEMPO (ETA)
         // ==========================================
         function getGlobalETA(newCart = []) {
             if (!newCart.length && !localOrders.find(o => o.status === 'p')) return 0;
@@ -285,12 +285,17 @@
             if (deliveryCount === 1) returnTime = 8;
             else if (deliveryCount >= 2) returnTime = 12;
             
-            // INTELIGENCIA DE TIEMPO: Se solapan los tiempos
-            if (cookingTime >= returnTime) {
-                return cookingTime;
-            } else {
-                return returnTime;
+            // INTELIGENCIA DE TIEMPO: Se solapan los tiempos en cocina
+            let readyToLeaveTime = Math.max(cookingTime, returnTime);
+            
+            // TIEMPO DE VIAJE HACIA EL CLIENTE 
+            let travelTime = 8; 
+            const addrInput = document.getElementById('cust-addr');
+            if (addrInput && addrInput.value.trim().toLowerCase().includes('local')) {
+                travelTime = 0;
             }
+            
+            return readyToLeaveTime + travelTime;
         }
 
         // ==========================================
@@ -323,7 +328,18 @@
             list.classList.remove('hidden');
         };
 
-        window.selectCustomer = (phone, name, address) => { document.getElementById('cust-name').value = name; document.getElementById('cust-addr').value = address; document.getElementById('cust-phone').value = phone; document.getElementById('autocomplete-list').classList.add('hidden'); };
+        window.selectCustomer = (phone, name, address) => { 
+            document.getElementById('cust-name').value = name; 
+            document.getElementById('cust-addr').value = address; 
+            document.getElementById('cust-phone').value = phone; 
+            document.getElementById('autocomplete-list').classList.add('hidden'); 
+            updatePOS_ETA(); // Recalcular en caso de que seleccione "Local"
+        };
+
+        window.updatePOS_ETA = () => {
+            const eta = getGlobalETA(cart);
+            document.getElementById('pos-eta').innerText = eta > 0 ? eta + ' min' : '0 min';
+        }
 
         window.sendTicketWS = (id) => {
             const o = localOrders.find(x => x.id === id); if(!o || !o.phone) return alert("No hay número registrado.");
@@ -375,17 +391,12 @@
         window.changeQty = (v) => { if(curItem.qty+v >= 1) curItem.qty += v; document.getElementById('m-qty').innerText = curItem.qty; calcM(); };
         function calcM() { let u = curItem.base; curItem.extras.forEach(x => u += x.p); u += (curItem.gen * 10); curItem.total = u * curItem.qty; document.getElementById('m-price').innerText = curItem.total; }
 
-        function updatePOS_ETA() {
-            const eta = getGlobalETA(cart);
-            document.getElementById('pos-eta').innerText = eta > 0 ? eta + ' min' : '0 min';
-        }
-
         window.addToCart = () => {
             if(curItem.needsMeat && !curItem.meat) return alert("Falta elegir carne.");
             if(curItem.meat === 'Mixto' && curItem.mixed.length !== 2) return alert("Debes elegir 2 carnes pal Mixto.");
             if(curItem.sweet && curItem.sweetOpts.length === 0) return alert("Selecciona mínimo 1 ingrediente.");
             curItem.notes = document.getElementById('m-notes').value.trim();
-            cart.push(curItem); renderCart(); closeModal(); updatePOS_ETA();
+            cart.push(curItem); renderCart(); closeModal();
         };
 
         // ==========================================
@@ -643,7 +654,7 @@
 
             document.getElementById('delivery-list').innerHTML = !r.length ? `<div class="text-center text-slate-300 py-20 font-black uppercase tracking-widest">Nada p' Repartir</div>` : r.map(o => `
                 <div class="bg-white border-l-8 border-orange-500 rounded-3xl p-5 shadow-lg relative">
-                    <div class="absolute top-4 right-4 flex gap-2"><button onclick="cancelOrd('${o.id}')" class="bg-red-50 text-red-500 px-3 py-1.5 rounded-full font-black text-[10px] uppercase shadow-sm border border-red-100"><i class="fa-solid fa-ban"></i></button>${o.phone ? `<button onclick="sendTicketWS('${o.id}')" class="bg-green-100 text-green-600 px-3 py-1.5 rounded-full font-black text-[10px] uppercase shadow-sm"><i class="fa-brands fa-whatsapp text-sm"></i></button>` : ''}<button onclick="editOrd('${o.id}')" class="bg-slate-100 text-slate-500 px-3 py-1.5 rounded-full font-black text-[10px] uppercase shadow-sm">Editar</button></div>
+                    <div class="absolute top-4 right-4 flex gap-2"><button onclick="cancelOrd('${o.id}')" class="bg-red-50 text-red-500 px-3 py-1.5 rounded-full font-black text-[10px] uppercase shadow-sm border border-red-100"><i class="fa-solid fa-ban"></i></button><button onclick="editOrd('${o.id}')" class="bg-slate-100 text-slate-500 px-3 py-1.5 rounded-full font-black text-[10px] uppercase shadow-sm">Editar</button></div>
                     <div class="flex justify-between items-start mb-4 pr-32 border-b border-slate-100 pb-3"><div><h3 class="font-black text-2xl italic uppercase tracking-tighter text-slate-800">${o.customer}</h3><span class="clock bg-orange-100 text-orange-700 px-2 py-0.5 rounded text-[10px] font-black tracking-widest inline-block mt-1" data-start="${o.created}" data-eta="${o.eta || 0}">⏱️ 00:00</span></div><span class="bg-slate-800 text-white font-black text-2xl px-4 py-2 rounded-2xl italic shadow-md">$${o.total}</span></div>
                     <div class="bg-slate-50 p-4 rounded-2xl mb-4 font-black uppercase italic border border-slate-200"><p class="text-[9px] text-slate-400 mb-1 tracking-widest font-bold">📍 Dirección</p><p class="text-xl leading-tight text-slate-700">${o.address}</p></div>
                     
@@ -652,7 +663,7 @@
                         ${o.cart.map(i => `<div><div class="font-black text-sm text-slate-800 leading-tight">${i.qty}x ${i.n}</div><div class="text-[10px] font-bold text-slate-500 uppercase mt-1 italic space-y-1">${i.meat ? `<p class="text-orange-700">🥩 ${i.meat === 'Mixto' ? 'Mixto ('+i.mixed.join('+')+')' : i.meat}</p>` : ''}${i.sweetOpts && i.sweetOpts.length ? `<p class="text-pink-600">🍓 ING: ${i.sweetOpts.join(', ')}</p>` : ''}${i.selSauces && i.selSauces.length ? `<p class="text-orange-600">🌶️ SALSAS: ${i.selSauces.join(', ')}</p>` : ''}${i.removed && i.removed.length ? `<p class="text-red-500">❌ Sin: ${i.removed.join(', ')}</p>` : (i.v ? `<p class="text-emerald-600 font-black">✅ CON TODO</p>` : '')}${i.extras && i.extras.length ? `<p class="text-green-600">➕ Con: ${i.extras.map(x=>x.n).join(', ')}</p>` : ''}${i.gen ? `<p class="text-purple-600">➕ Extras Gen: x${i.gen}</p>` : ''}${i.notes ? `<p class="text-blue-500 underline">Nota: ${i.notes}</p>` : ''}</div></div>`).join('<hr class="border-slate-200 my-2">')}
                     </div>
 
-                    ${o.phone ? `<div class="grid grid-cols-2 gap-3 mb-4"><a href="tel:${o.phone}" class="bg-blue-50 text-blue-600 font-black py-4 rounded-2xl flex flex-col items-center shadow-sm active:scale-95 border border-blue-100"><i class="fa-solid fa-phone text-xl mb-1"></i><span class="text-[9px] uppercase tracking-widest">Llamar</span></a><a href="https://wa.me/52${o.phone.replace(/\D/g,'')}" target="_blank" class="bg-green-50 text-green-600 font-black py-4 rounded-2xl flex flex-col items-center shadow-sm active:scale-95 border border-green-100"><i class="fa-brands fa-whatsapp text-xl mb-1"></i><span class="text-[9px] uppercase tracking-widest">WhatsApp</span></a></div>` : ''}
+                    ${o.phone ? `<div class="grid grid-cols-2 gap-3 mb-4"><a href="tel:${o.phone}" class="bg-blue-50 text-blue-600 font-black py-4 rounded-2xl flex flex-col items-center shadow-sm active:scale-95 border border-blue-100"><i class="fa-solid fa-phone text-xl mb-1"></i><span class="text-[9px] uppercase tracking-widest">Llamar</span></a><button onclick="sendTicketWS('${o.id}')" class="bg-green-50 text-green-600 font-black py-4 rounded-2xl flex flex-col items-center shadow-sm active:scale-95 border border-green-100 w-full"><i class="fa-brands fa-whatsapp text-xl mb-1"></i><span class="text-[9px] uppercase tracking-widest">WhatsApp</span></button></div>` : ''}
                     <div class="flex gap-3"><button onclick="window.open('https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.address)}')" class="flex-1 bg-slate-100 text-slate-600 font-black py-5 rounded-2xl text-[10px] uppercase tracking-widest active:scale-95 transition-transform"><i class="fa-solid fa-map-location-dot text-xl mb-1 block"></i> Mapa</button><button onclick="upStatus('${o.id}', 'f')" class="flex-[2] bg-orange-600 text-white font-black py-5 rounded-2xl shadow-xl uppercase italic tracking-widest active:scale-95 transition-transform"><i class="fa-solid fa-check text-xl mb-1 block"></i> Entregado</button></div>
                 </div>`).join('');
             
