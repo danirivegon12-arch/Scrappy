@@ -32,6 +32,9 @@
             <div id="sync-status" class="text-[10px] font-bold bg-orange-800 px-3 py-1.5 rounded-full uppercase tracking-widest shadow-inner flex items-center gap-1 transition-colors">
                 <i class="fa-solid fa-rotate"></i> <span>Offline</span>
             </div>
+            <button onclick="openExpense()" class="bg-red-500 w-8 h-8 rounded-full flex justify-center items-center active:scale-90 transition-transform shadow-inner text-sm" title="Registrar Gasto Rápido">
+                <i class="fa-solid fa-money-bill-wave"></i>
+            </button>
             <button onclick="openConfig()" class="bg-orange-700 w-8 h-8 rounded-full flex justify-center items-center active:scale-90 transition-transform shadow-inner text-sm">
                 <i class="fa-solid fa-gear"></i>
             </button>
@@ -98,7 +101,6 @@
                 <h2 class="text-xl font-black text-slate-800 uppercase italic tracking-tighter"><span class="text-2xl">📊</span> Control</h2>
                 <div class="flex gap-2">
                     <button onclick="generatePDF()" class="bg-slate-300 text-slate-800 font-black text-xs px-4 py-2 rounded-xl uppercase tracking-widest shadow-md active:scale-95 transition-transform"><i class="fa-solid fa-file-pdf text-red-600"></i> PDF</button>
-                    <button onclick="openExpense()" class="bg-slate-800 text-white font-black text-xs px-4 py-2 rounded-xl uppercase tracking-widest shadow-md active:scale-95 transition-transform"><i class="fa-solid fa-plus"></i> Gasto</button>
                 </div>
             </div>
 
