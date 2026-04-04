@@ -6,7 +6,6 @@
     <title>Scrappy POS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- Librerías para exportar a PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     
@@ -27,7 +26,6 @@
 </head>
 <body class="flex flex-col h-screen overflow-hidden text-slate-800">
 
-    <!-- Header -->
     <header class="bg-orange-600 text-white p-4 shadow-md flex justify-between items-center z-40">
         <h1 class="text-3xl font-black italic tracking-tighter">SCRAPPY</h1>
         <div class="flex items-center gap-2">
@@ -40,10 +38,8 @@
         </div>
     </header>
 
-    <!-- Main Content -->
     <main class="flex-1 overflow-y-auto pb-36 relative">
         
-        <!-- VISTA 1: CAPTURA (POS) -->
         <section id="view-pos" class="p-4 flex flex-col gap-4">
             <div class="bg-white border-2 border-slate-200 rounded-3xl p-4 shadow-sm flex-shrink-0 sticky top-0 z-10">
                 <div class="flex justify-between items-center border-b border-slate-100 pb-2 mb-2">
@@ -87,7 +83,6 @@
             </div>
         </section>
 
-        <!-- VISTAS COCINA Y REPARTO -->
         <section id="view-kitchen" class="p-4 hidden space-y-4 bg-slate-100 min-h-full">
             <h2 class="text-xl font-black text-slate-800 uppercase italic tracking-tighter"><span class="text-2xl">🍳</span> Pedidos Activos</h2>
             <div id="kitchen-list" class="space-y-4 pb-10"></div>
@@ -98,7 +93,6 @@
             <div id="delivery-list" class="space-y-4 pb-10"></div>
         </section>
 
-        <!-- VISTA CONTROL -->
         <section id="view-control" class="p-4 hidden bg-slate-100 min-h-full">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-xl font-black text-slate-800 uppercase italic tracking-tighter"><span class="text-2xl">📊</span> Control</h2>
@@ -108,7 +102,6 @@
                 </div>
             </div>
 
-            <!-- Toggles de Sub-pestañas -->
             <div class="flex gap-2 mb-4 bg-slate-200 p-1 rounded-2xl">
                 <button id="tab-finanzas" onclick="switchControlTab('finanzas')" class="flex-1 bg-white text-slate-800 shadow-sm py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all">Finanzas</button>
                 <button id="tab-historial" onclick="switchControlTab('historial')" class="flex-1 text-slate-500 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all">Historial</button>
@@ -120,7 +113,6 @@
 
     </main>
 
-    <!-- Modal Gastos -->
     <div id="modal-expense" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm hidden justify-center items-center z-[70] p-4">
         <div class="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl animate-[slideIn_0.2s_ease-out]">
             <h3 class="text-2xl font-black text-slate-800 mb-2"><i class="fa-solid fa-money-bill-wave text-red-500"></i> Registrar Gasto</h3>
@@ -136,7 +128,6 @@
         </div>
     </div>
 
-    <!-- Modal Contraseña para Borrar -->
     <div id="modal-password" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm hidden justify-center items-center z-[80] p-4">
         <div class="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl animate-[slideIn_0.2s_ease-out] text-center">
             <div class="text-4xl text-red-500 mb-3"><i class="fa-solid fa-lock"></i></div>
@@ -150,7 +141,6 @@
         </div>
     </div>
 
-    <!-- Modal Contraseña Control -->
     <div id="modal-auth-control" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm hidden justify-center items-center z-[80] p-4">
         <div class="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl animate-[slideIn_0.2s_ease-out] text-center">
             <div class="text-4xl text-orange-500 mb-3"><i class="fa-solid fa-lock"></i></div>
@@ -164,7 +154,6 @@
         </div>
     </div>
 
-    <!-- Modal Configuración GitHub -->
     <div id="modal-config" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm hidden justify-center items-center z-[70] p-4">
         <div class="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl animate-[slideIn_0.2s_ease-out]">
             <h3 class="text-2xl font-black text-slate-800 mb-2"><i class="fa-brands fa-github"></i> Sincronización</h3>
@@ -181,12 +170,11 @@
         </div>
     </div>
 
-    <!-- Modal Personalización Producto -->
     <div id="modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden justify-center items-end z-[60]">
         <div class="bg-white rounded-t-[2.5rem] w-full max-w-lg p-6 pb-10 shadow-2xl overflow-y-auto max-h-[90vh]">
             <div class="flex justify-between items-start border-b border-slate-100 pb-4 mb-4">
                 <div><h3 id="m-name" class="text-3xl font-black italic uppercase tracking-tighter text-slate-800">Producto</h3><p class="text-orange-600 font-black text-2xl">$<span id="m-price">0</span></p></div>
-                <button onclick="closeModal()" class="bg-slate-100 text-slate-400 w-10 h-10 rounded-full font-black text-xl flex items-center justify-center">&times;</button>
+                <button onclick="closeModal()" class="bg-slate-100 text-slate-400 w-10 h-10 rounded-full font-black text-xl flex items-center justify-center">×</button>
             </div>
 
             <div id="m-meat-sec" class="mb-6 hidden"><p class="text-[10px] font-black text-red-500 uppercase tracking-widest mb-3">🥩 Carne Requerida:</p><div class="grid grid-cols-2 gap-3" id="meat-grid"></div><div id="m-mixed-opts" class="mt-4 p-4 bg-orange-50 rounded-2xl border-2 border-orange-200 hidden"><p class="text-[10px] font-black text-orange-800 uppercase tracking-widest mb-3">Elige 2 carnes pal Mixto:</p><div class="flex gap-2" id="mixed-grid"></div></div></div>
@@ -212,7 +200,6 @@
         </div>
     </div>
 
-    <!-- Nav Inferior -->
     <nav class="fixed bottom-0 w-full bg-white border-t border-slate-200 flex z-50 shadow-[0_-4px_15px_rgba(0,0,0,0.05)] pb-safe">
         <button onclick="switchTab('pos')" id="btn-pos" class="flex-1 py-3 flex flex-col items-center tab-active transition-all relative"><i class="fa-solid fa-cash-register text-xl mb-1"></i><span class="text-[9px] font-black uppercase tracking-widest">Captura</span></button>
         <button onclick="switchTab('kitchen')" id="btn-kitchen" class="flex-1 py-3 flex flex-col items-center tab-inactive transition-all relative border-l border-slate-100"><i class="fa-solid fa-fire text-xl mb-1"></i><span class="text-[9px] font-black uppercase tracking-widest">Cocina</span><span id="badge-k" class="absolute top-1 right-2 bg-red-500 text-white text-[9px] font-black px-1.5 rounded-full hidden shadow-md">0</span></button>
@@ -222,16 +209,16 @@
 
     <script>
         // ==========================================
-        // 1. CONFIGURACIÓN Y DATOS DE MENÚ
+        // 1. CONFIGURACIÓN Y DATOS DE MENÚ (TIEMPOS ACTUALIZADOS)
         // ==========================================
         const ADMIN_PASS = "58654"; 
 
         const menu = [
-            { cat: "Hamb. Res", icon: "🍔", items: [ { id: 'r1', n: "Scrappy Clasica", p: 60, v: 'burger', e: true, time: 5 }, { id: 'r2', n: "Tocino Crunch", p: 70, v: 'burger', e: true, time: 5 }, { id: 'r3', n: "Double Cheese Chipotle", p: 75, v: 'burger', e: true, time: 5 }, { id: 'r4', n: "Big Scrappy", p: 80, v: 'burger', e: true, time: 5 } ] },
-            { cat: "Hamb. Pollo", icon: "🐔", items: [ { id: 'p1', n: "Simple Chiken", p: 60, v: 'burger', e: true, time: 15 }, { id: 'p2', n: "Big Chiken", p: 70, v: 'burger', e: true, time: 15 } ] },
-            { cat: "Especialidades", icon: "🥪", items: [ { id: 'e1', n: "Lonche", p: 44, v: 'burger', e: true, meat: true, time: 5 }, { id: 'e2', n: "Sandwich", p: 30, v: 'burger', e: true, meat: true, time: 5 }, { id: 'e3', n: "2 Sincronizadas", p: 45, v: 'burger', e: true, meat: true, time: 5 }, { id: 'e4', n: "2 Quesadillas Harina", p: 50, v: false, e: true, time: 5 }, { id: 'b5', n: "Waffles", p: 45, sweet: true, time: 12 }, { id: 'b6', n: "Crepas", p: 40, sweet: true, time: 12 } ] },
-            { cat: "Snacks", icon: "🍟", items: [ { id: 's1', n: "Alitas (Medio Kilo)", p: 100, e: true, hasSauce: true, time: 20, fried: true }, { id: 's2', n: "Boneless", p: 99, e: true, hasSauce: true, time: 15, fried: true }, { id: 's3', n: "Papas Gajo", p: 45, e: true, time: 14, fried: true }, { id: 's4', n: "Papas Gajo Queso", p: 65, e: true, time: 14, fried: true }, { id: 's5', n: "Papa Francesa", p: 35, e: true, time: 14, fried: true }, { id: 's6', n: "Dedos de Queso", p: 80, e: true, time: 10, fried: true }, { id: 's7', n: "Aros Cebolla", p: 60, e: true, time: 10, fried: true }, { id: 's8', n: "Hot Dog Sencillo", p: 25, v: 'hotdog', e: true, time: 5 }, { id: 's9', n: "Hot Dog Tocino", p: 32, v: 'hotdog', e: true, time: 5 } ] },
-            { cat: "Bebidas", icon: "🥤", items: [ { id: 'b1', n: "Coca 500ml", p: 24, time: 3 }, { id: 'b2', n: "Coca 250ml", p: 12, time: 3 }, { id: 'b3', n: "Malteada", p: 25, time: 3 }, { id: 'b4', n: "Perla Explosiva", p: 50, time: 3 } ] }
+            { cat: "Hamb. Res", icon: "🍔", items: [ { id: 'r1', n: "Scrappy Clasica", p: 60, v: 'burger', e: true, time: 10 }, { id: 'r2', n: "Tocino Crunch", p: 70, v: 'burger', e: true, time: 10 }, { id: 'r3', n: "Double Cheese Chipotle", p: 75, v: 'burger', e: true, time: 10 }, { id: 'r4', n: "Big Scrappy", p: 80, v: 'burger', e: true, time: 10 } ] },
+            { cat: "Hamb. Pollo", icon: "🐔", items: [ { id: 'p1', n: "Simple Chiken", p: 60, v: 'burger', e: true, time: 10 }, { id: 'p2', n: "Big Chiken", p: 70, v: 'burger', e: true, time: 10 } ] },
+            { cat: "Especialidades", icon: "🥪", items: [ { id: 'e1', n: "Lonche", p: 44, v: 'burger', e: true, meat: true, time: 7 }, { id: 'e2', n: "Sandwich", p: 30, v: 'burger', e: true, meat: true, time: 7 }, { id: 'e3', n: "2 Sincronizadas", p: 45, v: 'burger', e: true, meat: true, time: 7 }, { id: 'e4', n: "2 Quesadillas Harina", p: 50, v: false, e: true, time: 15 }, { id: 'b5', n: "Waffles", p: 45, sweet: true, time: 12 }, { id: 'b6', n: "Crepas", p: 40, sweet: true, time: 12 } ] },
+            { cat: "Snacks", icon: "🍟", items: [ { id: 's1', n: "Alitas (Medio Kilo)", p: 100, e: true, hasSauce: true, time: 20, fried: true }, { id: 's2', n: "Boneless", p: 99, e: true, hasSauce: true, time: 15, fried: true }, { id: 's3', n: "Papas Gajo", p: 45, e: true, time: 15, fried: true }, { id: 's4', n: "Papas Gajo Queso", p: 65, e: true, time: 15, fried: true }, { id: 's5', n: "Papa Francesa", p: 35, e: true, time: 15, fried: true }, { id: 's6', n: "Dedos de Queso", p: 80, e: true, time: 12, fried: true }, { id: 's7', n: "Aros Cebolla", p: 60, e: true, time: 12, fried: true }, { id: 's8', n: "Hot Dog Sencillo", p: 25, v: 'hotdog', e: true, time: 10 }, { id: 's9', n: "Hot Dog Tocino", p: 32, v: 'hotdog', e: true, time: 10 } ] },
+            { cat: "Bebidas", icon: "🥤", items: [ { id: 'b1', n: "Coca 500ml", p: 24, time: 1 }, { id: 'b2', n: "Coca 250ml", p: 12, time: 1 }, { id: 'b3', n: "Malteada", p: 25, time: 5 }, { id: 'b4', n: "Perla Explosiva", p: 50, time: 5 } ] }
         ];
 
         const VEG_BURGER = ["Jitomate", "Cebolla", "Lechuga", "Jalapeño", "Aguacate", "Catsup", "Mostaza"];
@@ -253,88 +240,124 @@
         let ghSha = null; let isSyncing = false;
 
         // ==========================================
-        // ALGORITMO DE TIEMPO (ETA) - SIMULADOR DE CAPACIDAD MEJORADO
+        // ALGORITMO DE TIEMPO (ETA) - SIMULADOR DE COCINA VIRUTAL Y REPARTO
         // ==========================================
         function getGlobalETA(newCart = []) {
-            if (!newCart || newCart.length === 0) return 0;
+            const now = Date.now();
             
-            // 4 Áreas de Trabajo
-            let fryers = [0, 0]; // 2 Freidoras
-            let griddles = [0, 0, 0, 0]; // 1 Plancha, 4 espacios
-            let drinks = [0]; // 1 slot para preparar bebidas
-            
-            // Evaluamos órdenes previas (solo las que siguen en 'p' - Preparación)
-            let pendingOrders = localOrders.filter(o => o.status === 'p').sort((a,b) => a.created - b.created);
-            
-            pendingOrders.forEach(o => {
-                const elapsedMins = Math.floor((Date.now() - o.created) / 60000);
-                o.cart.forEach(it => {
-                    let t = it.time || 5;
-                    if (it.meat === 'Pollo' || (it.mixed && it.mixed.includes('Pollo'))) t = Math.max(t, 15);
-                    
-                    // Solo sumar el tiempo restante
-                    let rem = Math.max(0, t - elapsedMins);
-                    
-                    for(let i=0; i < it.qty; i++) {
-                        if (it.fried) {
-                            let minIdx = fryers.indexOf(Math.min(...fryers));
-                            fryers[minIdx] += rem;
-                        } else if (['b1', 'b2', 'b3', 'b4'].includes(it.id)) {
-                            drinks[0] += rem;
-                        } else {
-                            let minIdx = griddles.indexOf(Math.min(...griddles));
-                            griddles[minIdx] += rem;
-                        }
-                    }
-                });
-            });
-
-            // Asignar el carrito nuevo
-            newCart.forEach(it => {
-                let t = it.time || 5;
-                if (it.meat === 'Pollo' || (it.mixed && it.mixed.includes('Pollo'))) t = Math.max(t, 15);
-                
-                for(let i=0; i < it.qty; i++) {
-                    if (it.fried) {
-                        let minIdx = fryers.indexOf(Math.min(...fryers));
-                        fryers[minIdx] += t;
-                    } else if (['b1', 'b2', 'b3', 'b4'].includes(it.id)) {
-                        drinks[0] += t;
-                    } else {
-                        let minIdx = griddles.indexOf(Math.min(...griddles));
-                        griddles[minIdx] += t;
-                    }
-                }
-            });
-            
-            // El tiempo de cocina es el área que más tarde en terminar
-            let maxFriedTime = Math.max(...fryers);
-            let maxGrillTime = Math.max(...griddles);
-            let maxDrinkTime = Math.max(...drinks);
-            
-            let cookingTime = Math.ceil(Math.max(maxFriedTime, maxGrillTime, maxDrinkTime));
-            
-            // Cálculo del viaje del repartidor
-            const deliveryCount = localOrders.filter(o => o.status === 'r').length;
-            let returnTime = 0;
-            if (deliveryCount === 1) returnTime = 8;
-            else if (deliveryCount >= 2) returnTime = 12;
-            
-            // SOLAPAMIENTO MÁGICO: Si la comida tarda más que el repartidor, el viaje de regreso no cuenta.
-            let readyToLeaveTime = Math.max(cookingTime, returnTime);
-            
-            // Tiempo del viaje final al cliente
-            let travelTime = 8; 
-            const addrInput = document.getElementById('cust-addr');
-            if (addrInput && addrInput.value.trim().toLowerCase().includes('local')) {
-                travelTime = 0;
+            // 1. Clonar pedidos activos en preparación o en fila de reparto
+            let activeOrders = localOrders.filter(o => o.status === 'p' || o.status === 'r')
+                                          .map(o => ({...o, isNew: false}));
+                                          
+            // Agregar el carrito actual como un pedido hipotético que entra "ahora"
+            if (newCart && newCart.length > 0) {
+                activeOrders.push({ id: 'new_temp', created: now, status: 'p', cart: newCart, isNew: true });
             }
             
-            return readyToLeaveTime + travelTime;
+            // Ordenar por tiempo real de creación
+            activeOrders.sort((a, b) => a.created - b.created);
+            
+            // Slots de la cocina virtual: guardan el timestamp (ms) en que se desocupan
+            let griddles = [0, 0, 0, 0]; // 4 espacios en la plancha
+            let fryers = [0, 0];         // 2 freidoras
+            let drinks = [0];            // 1 estación de bebidas
+            
+            let riderAvailableAt = now; 
+            let deliveryQueue = [];
+            let newOrderKitchenReadyTime = 0;
+            
+            // 2. Simular el paso de cada producto por la cocina
+            activeOrders.forEach(o => {
+                let orderReadyTime = o.created;
+                
+                // Si el pedido ya está en fila de reparto, asumimos que su tiempo de cocina terminó
+                if (o.status === 'r') {
+                    orderReadyTime = Math.max(o.created, now); 
+                }
+                
+                if (o.status === 'p' || o.isNew) {
+                    o.cart.forEach(it => {
+                        for(let i = 0; i < it.qty; i++) {
+                            let tMins = it.time || 5;
+                            
+                            // Reglas especiales de tiempos
+                            if (it.id === 'e4') tMins = 15; // Quesadillas harina
+                            // Si lleva pollo y NO es la hamburguesa p1 ni p2 (que esas ya tienen 10m en menu)
+                            if ((it.meat === 'Pollo' || (it.mixed && it.mixed.includes('Pollo'))) && !['p1', 'p2'].includes(it.id)) {
+                                tMins = 15;
+                            }
+                            
+                            // Asignar área de trabajo
+                            let resourceArr = griddles;
+                            if (it.fried) resourceArr = fryers;
+                            else if (['b1', 'b2', 'b3', 'b4'].includes(it.id)) resourceArr = drinks;
+                            
+                            // Encontrar el espacio que se desocupa más pronto
+                            let earliestTime = Math.min(...resourceArr);
+                            let earliestIdx = resourceArr.indexOf(earliestTime);
+                            
+                            // El producto empieza a hacerse cuando el pedido entra O cuando el slot se libere
+                            // Lo que ocurra al último, y nunca en el pasado respecto al 'now' para recursos ociosos.
+                            let startTimeMs = Math.max(o.created, earliestTime, now); 
+                            let finishTimeMs = startTimeMs + (tMins * 60000);
+                            
+                            // Ocupar el slot en la cocina
+                            resourceArr[earliestIdx] = finishTimeMs;
+                            
+                            // El pedido completo está listo cuando sale su último artículo
+                            if (finishTimeMs > orderReadyTime) orderReadyTime = finishTimeMs;
+                        }
+                    });
+                }
+                
+                if (o.isNew) newOrderKitchenReadyTime = orderReadyTime;
+                
+                // Lo mandamos a la fila virtual de reparto
+                deliveryQueue.push({ id: o.id, readyTime: Math.max(orderReadyTime, now), isNew: o.isNew });
+            });
+            
+            // 3. Simular la logística del repartidor
+            deliveryQueue.sort((a, b) => a.readyTime - b.readyTime);
+            let newOrderFinalETA = newOrderKitchenReadyTime;
+            
+            // Validar si el cliente pidió comer en local (no lleva tiempo de viaje)
+            const addrInput = document.getElementById('cust-addr');
+            const isLocal = addrInput && addrInput.value.trim().toLowerCase().includes('local');
+            
+            if (!isLocal) {
+                while(deliveryQueue.length > 0) {
+                    let first = deliveryQueue[0];
+                    // El viaje inicia cuando el repartidor vuelve Y el primer pedido está listo
+                    let departureTime = Math.max(riderAvailableAt, first.readyTime);
+                    
+                    // Ventana de 4 minutos para llevarse otros pedidos listos
+                    let windowEnd = departureTime + (4 * 60000);
+                    let batch = deliveryQueue.filter(q => q.readyTime <= windowEnd);
+                    
+                    // Sacarlos de la fila
+                    deliveryQueue = deliveryQueue.filter(q => !batch.includes(q));
+                    
+                    let travelTotal = 0;
+                    batch.forEach((batched, idx) => {
+                        // El 1er pedido agrega 10 mins al viaje, los extras 4 mins
+                        travelTotal += (idx === 0) ? 10 : 4;
+                        if (batched.isNew) {
+                            // Su ETA real al cliente es cuando llega a su puerta en la ruta
+                            newOrderFinalETA = departureTime + (travelTotal * 60000);
+                        }
+                    });
+                    
+                    // El repartidor se libera al finalizar toda la ruta
+                    riderAvailableAt = departureTime + (travelTotal * 60000); 
+                }
+            }
+            
+            let etaMins = Math.ceil((newOrderFinalETA - now) / 60000);
+            return etaMins > 0 ? etaMins : 0;
         }
 
         // ==========================================
-        // 3. UI PRINCIPAL Y WHATSAPP
+        // 3. UI PRINCIPAL Y RESTO DE LOGICA
         // ==========================================
         function initUI() {
             const catGrid = document.getElementById('pos-categories');
@@ -359,7 +382,7 @@
             if (!val.trim()) { list.classList.add('hidden'); return; }
             const q = val.toLowerCase(); const matches = localCustomers.filter(c => c.name.toLowerCase().includes(q));
             if (matches.length === 0) { list.classList.add('hidden'); return; }
-            list.innerHTML = matches.map(c => `<div onclick="selectCustomer('${c.phone || ''}', '${c.name.replace(/'/g, "\\'")}', '${c.address.replace(/'/g, "\\'")}')" class="p-4 border-b border-slate-100 active:bg-orange-50 cursor-pointer transition-colors last:border-0 hover:bg-slate-50"><div class="font-black text-slate-800 uppercase italic">${c.name}</div><div class="text-[10px] font-bold text-slate-400 mt-1 truncate"><i class="fa-solid fa-location-dot mr-1 text-slate-300"></i>${c.address} ${c.phone ? `&nbsp;•&nbsp; <i class="fa-solid fa-phone mx-1 text-orange-400"></i>${c.phone}` : ''}</div></div>`).join('');
+            list.innerHTML = matches.map(c => `<div onclick="selectCustomer('${c.phone || ''}', '${c.name.replace(/'/g, "\\'")}', '${c.address.replace(/'/g, "\\'")}')" class="p-4 border-b border-slate-100 active:bg-orange-50 cursor-pointer transition-colors last:border-0 hover:bg-slate-50"><div class="font-black text-slate-800 uppercase italic">${c.name}</div><div class="text-[10px] font-bold text-slate-400 mt-1 truncate"><i class="fa-solid fa-location-dot mr-1 text-slate-300"></i>${c.address} ${c.phone ? ` • <i class="fa-solid fa-phone mx-1 text-orange-400"></i>${c.phone}` : ''}</div></div>`).join('');
             list.classList.remove('hidden');
         };
 
@@ -394,9 +417,6 @@
             window.open(`https://wa.me/${phoneStr}?text=${encodeURIComponent(msg)}`, '_blank');
         };
 
-        // ==========================================
-        // 4. MODALES POS Y LÓGICA DE PERSONALIZACIÓN
-        // ==========================================
         window.openM = (it) => {
             curItem = { ...it, base: it.p, qty: 1, removed: [], extras: [], meat: null, mixed: [], sweetOpts: [], selSauces: [], gen: 0, notes: "", needsMeat: it.meat, total: it.p };
             document.getElementById('m-name').innerText = it.n; document.getElementById('m-qty').innerText = 1; document.getElementById('m-gen-val').innerText = 0; document.getElementById('m-notes').value = "";
@@ -434,9 +454,6 @@
             cart.push(curItem); renderCart(); closeModal(); updatePOS_ETA();
         };
 
-        // ==========================================
-        // 5. CARRITO Y GUARDADO
-        // ==========================================
         function renderCart() {
             const cont = document.getElementById('pos-cart-list'); const totEl = document.getElementById('pos-total');
             if(!cart.length) { cont.innerHTML = `<p class="text-slate-400 italic text-center py-2 font-normal">No hay productos en el pedido.</p>`; totEl.innerText = 0; updatePOS_ETA(); return; }
@@ -509,9 +526,6 @@
             localStorage.setItem('scrappy_cust', JSON.stringify(localCustomers)); 
         }
 
-        // ==========================================
-        // 6. MOTOR GITHUB SYNC
-        // ==========================================
         window.openConfig = () => document.getElementById('modal-config').classList.replace('hidden', 'flex');
         window.closeConfig = () => document.getElementById('modal-config').classList.replace('flex', 'hidden');
         window.saveConfig = () => { ghUser = document.getElementById('cfg-user').value.trim(); ghRepo = document.getElementById('cfg-repo').value.trim(); ghToken = document.getElementById('cfg-token').value.trim(); localStorage.setItem('gh_user', ghUser); localStorage.setItem('gh_repo', ghRepo); localStorage.setItem('gh_token', ghToken); closeConfig(); syncWithGitHub(); };
@@ -561,9 +575,6 @@
             isSyncing = false;
         }
 
-        // ==========================================
-        // 7. LÓGICA DE CONTROL Y SEGURIDAD
-        // ==========================================
         window.attemptSwitchControl = () => {
             document.getElementById('auth-pass').value = '';
             document.getElementById('modal-auth-control').classList.replace('hidden', 'flex');
@@ -659,9 +670,6 @@
             doc.save(`Scrappy_Balance_${new Date().toLocaleDateString().replace(/\//g, '-')}.pdf`);
         };
 
-        // ==========================================
-        // VISTAS DE COCINA Y REPARTO
-        // ==========================================
         function updateViews() {
             localOrders.sort((a, b) => a.created - b.created);
             const p = localOrders.filter(x => x.status === 'p'); const r = localOrders.filter(x => x.status === 'r');
@@ -722,5 +730,3 @@
     </script>
 </body>
 </html>
-
-
