@@ -77,7 +77,6 @@
                         <div id="autocomplete-list" class="absolute z-50 w-full bg-white rounded-xl shadow-2xl border border-slate-200 mt-1 hidden max-h-48 overflow-y-auto"></div>
                     </div>
 
-                    <!-- NUEVO: oninput actualizará el ETA al detectar la palabra "local" -->
                     <input type="text" id="cust-addr" oninput="updatePOS_ETA()" placeholder="Dirección o 'Local' *" class="w-full p-4 bg-slate-700 text-white placeholder-slate-400 border border-slate-600 rounded-2xl focus:ring-2 focus:ring-orange-500 outline-none font-bold">
                     <input type="tel" id="cust-phone" placeholder="Celular (Opcional)" class="w-full p-4 bg-slate-700 text-white placeholder-slate-400 border border-slate-600 rounded-2xl focus:ring-2 focus:ring-orange-500 outline-none font-bold">
                 </div>
@@ -255,7 +254,8 @@
         // ALGORITMO DE TIEMPO (ETA)
         // ==========================================
         function getGlobalETA(newCart = []) {
-            if (!newCart.length && !localOrders.find(o => o.status === 'p')) return 0;
+            // REGLA DE ORO: Si el carrito está vacío, el ETA SIEMPRE ES 0 MINUTOS.
+            if (!newCart || newCart.length === 0) return 0;
             
             const day = new Date().getDay();
             const baseStaff = (day === 0 || day === 6) ? 3 : 2; 
@@ -285,10 +285,10 @@
             if (deliveryCount === 1) returnTime = 8;
             else if (deliveryCount >= 2) returnTime = 12;
             
-            // INTELIGENCIA DE TIEMPO: Se solapan los tiempos en cocina
+            // Fusión de Tiempo en Cocina (Solapamiento)
             let readyToLeaveTime = Math.max(cookingTime, returnTime);
             
-            // TIEMPO DE VIAJE HACIA EL CLIENTE 
+            // Suma de Entrega (Viaje)
             let travelTime = 8; 
             const addrInput = document.getElementById('cust-addr');
             if (addrInput && addrInput.value.trim().toLowerCase().includes('local')) {
@@ -333,7 +333,7 @@
             document.getElementById('cust-addr').value = address; 
             document.getElementById('cust-phone').value = phone; 
             document.getElementById('autocomplete-list').classList.add('hidden'); 
-            updatePOS_ETA(); // Recalcular en caso de que seleccione "Local"
+            updatePOS_ETA(); 
         };
 
         window.updatePOS_ETA = () => {
@@ -396,7 +396,7 @@
             if(curItem.meat === 'Mixto' && curItem.mixed.length !== 2) return alert("Debes elegir 2 carnes pal Mixto.");
             if(curItem.sweet && curItem.sweetOpts.length === 0) return alert("Selecciona mínimo 1 ingrediente.");
             curItem.notes = document.getElementById('m-notes').value.trim();
-            cart.push(curItem); renderCart(); closeModal();
+            cart.push(curItem); renderCart(); closeModal(); updatePOS_ETA();
         };
 
         // ==========================================
@@ -663,11 +663,16 @@
                         ${o.cart.map(i => `<div><div class="font-black text-sm text-slate-800 leading-tight">${i.qty}x ${i.n}</div><div class="text-[10px] font-bold text-slate-500 uppercase mt-1 italic space-y-1">${i.meat ? `<p class="text-orange-700">🥩 ${i.meat === 'Mixto' ? 'Mixto ('+i.mixed.join('+')+')' : i.meat}</p>` : ''}${i.sweetOpts && i.sweetOpts.length ? `<p class="text-pink-600">🍓 ING: ${i.sweetOpts.join(', ')}</p>` : ''}${i.selSauces && i.selSauces.length ? `<p class="text-orange-600">🌶️ SALSAS: ${i.selSauces.join(', ')}</p>` : ''}${i.removed && i.removed.length ? `<p class="text-red-500">❌ Sin: ${i.removed.join(', ')}</p>` : (i.v ? `<p class="text-emerald-600 font-black">✅ CON TODO</p>` : '')}${i.extras && i.extras.length ? `<p class="text-green-600">➕ Con: ${i.extras.map(x=>x.n).join(', ')}</p>` : ''}${i.gen ? `<p class="text-purple-600">➕ Extras Gen: x${i.gen}</p>` : ''}${i.notes ? `<p class="text-blue-500 underline">Nota: ${i.notes}</p>` : ''}</div></div>`).join('<hr class="border-slate-200 my-2">')}
                     </div>
 
-                    ${o.phone ? `<div class="grid grid-cols-2 gap-3 mb-4"><a href="tel:${o.phone}" class="bg-blue-50 text-blue-600 font-black py-4 rounded-2xl flex flex-col items-center shadow-sm active:scale-95 border border-blue-100"><i class="fa-solid fa-phone text-xl mb-1"></i><span class="text-[9px] uppercase tracking-widest">Llamar</span></a><button onclick="sendTicketWS('${o.id}')" class="bg-green-50 text-green-600 font-black py-4 rounded-2xl flex flex-col items-center shadow-sm active:scale-95 border border-green-100 w-full"><i class="fa-brands fa-whatsapp text-xl mb-1"></i><span class="text-[9px] uppercase tracking-widest">WhatsApp</span></button></div>` : ''}
+                    <div class="grid grid-cols-2 gap-3 mb-4">
+                        ${o.phone ? `<a href="tel:${o.phone}" class="bg-blue-50 text-blue-600 font-black py-4 rounded-2xl flex flex-col items-center shadow-sm active:scale-95 border border-blue-100"><i class="fa-solid fa-phone text-xl mb-1"></i><span class="text-[9px] uppercase tracking-widest">Llamar</span></a>` : ''}
+                        <button onclick="sendTicketWS('${o.id}')" class="${o.phone ? 'col-span-1' : 'col-span-2'} bg-green-50 text-green-600 font-black py-4 rounded-2xl flex flex-col items-center shadow-sm active:scale-95 border border-green-100 w-full"><i class="fa-brands fa-whatsapp text-xl mb-1"></i><span class="text-[9px] uppercase tracking-widest">WhatsApp</span></button>
+                    </div>
                     <div class="flex gap-3"><button onclick="window.open('https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(o.address)}')" class="flex-1 bg-slate-100 text-slate-600 font-black py-5 rounded-2xl text-[10px] uppercase tracking-widest active:scale-95 transition-transform"><i class="fa-solid fa-map-location-dot text-xl mb-1 block"></i> Mapa</button><button onclick="upStatus('${o.id}', 'f')" class="flex-[2] bg-orange-600 text-white font-black py-5 rounded-2xl shadow-xl uppercase italic tracking-widest active:scale-95 transition-transform"><i class="fa-solid fa-check text-xl mb-1 block"></i> Entregado</button></div>
                 </div>`).join('');
             
-            renderControl(); updateClocks();
+            renderControl(); 
+            updateClocks();
+            updatePOS_ETA(); // NUEVO: Refresca el ETA en la pantalla principal si la fila de cocina se mueve
         }
 
         function updateClocks() { document.querySelectorAll('.clock').forEach(el => { const s = parseInt(el.getAttribute('data-start')); const eta = parseInt(el.getAttribute('data-eta')) || 15; const diff = Math.floor((Date.now() - s) / 1000); const h = Math.floor(diff / 3600); const m = Math.floor((diff % 3600) / 60).toString().padStart(2, '0'); const sc = (diff % 60).toString().padStart(2, '0'); el.innerText = h > 0 ? `⏱️ ${h}:${m}:${sc}` : `⏱️ ${m}:${sc}`; if(diff > (eta * 60)) el.classList.add('timer-alert'); }); }
