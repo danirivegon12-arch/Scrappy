@@ -259,10 +259,17 @@
             // Ordenar por tiempo real de creación
             activeOrders.sort((a, b) => a.created - b.created);
             
-            // Slots de la cocina virtual: guardan el timestamp (ms) en que se desocupan
+            // Días de la semana para cantidad de empleados (0: Dom, 6: Sáb)
+            const dayOfWeek = new Date().getDay(); 
+            const numWorkers = (dayOfWeek === 0 || dayOfWeek === 6) ? 3 : 2;
+            
+            // Slots de la cocina virtual y empleados: guardan el timestamp (ms) en que se desocupan
+            let workers = new Array(numWorkers).fill(0);
             let griddles = [0, 0, 0, 0]; // 4 espacios en la plancha
-            let fryers = [0, 0];         // 2 freidoras
-            let drinks = [0];            // 1 estación de bebidas
+            let fryers = [0, 0];         // 2 freidoras (Automáticas)
+            let blender = [0];           // 1 licuadora
+            let wafflera = [0];          // 1 wafflera
+            let crepera = [0];           // 1 crepera
             
             let riderAvailableAt = now; 
             let deliveryQueue = [];
@@ -284,27 +291,49 @@
                             
                             // Reglas especiales de tiempos
                             if (it.id === 'e4') tMins = 15; // Quesadillas harina
-                            // Si lleva pollo y NO es la hamburguesa p1 ni p2 (que esas ya tienen 10m en menu)
+                            // Si lleva pollo y NO es la hamburguesa p1 ni p2
                             if ((it.meat === 'Pollo' || (it.mixed && it.mixed.includes('Pollo'))) && !['p1', 'p2'].includes(it.id)) {
                                 tMins = 15;
                             }
                             
-                            // Asignar área de trabajo
-                            let resourceArr = griddles;
-                            if (it.fried) resourceArr = fryers;
-                            else if (['b1', 'b2', 'b3', 'b4'].includes(it.id)) resourceArr = drinks;
+                            let tMs = tMins * 60000;
+                            let finishTimeMs = 0;
                             
-                            // Encontrar el espacio que se desocupa más pronto
-                            let earliestTime = Math.min(...resourceArr);
-                            let earliestIdx = resourceArr.indexOf(earliestTime);
-                            
-                            // El producto empieza a hacerse cuando el pedido entra O cuando el slot se libere
-                            // Lo que ocurra al último, y nunca en el pasado respecto al 'now' para recursos ociosos.
-                            let startTimeMs = Math.max(o.created, earliestTime, now); 
-                            let finishTimeMs = startTimeMs + (tMins * 60000);
-                            
-                            // Ocupar el slot en la cocina
-                            resourceArr[earliestIdx] = finishTimeMs;
+                            // LÓGICA DE ASIGNACIÓN
+                            if (it.fried) {
+                                // Freidoras son automáticas: solo buscan el slot de freidora libre, no bloquean al empleado todo el tiempo
+                                let earliestFryer = Math.min(...fryers);
+                                let fIdx = fryers.indexOf(earliestFryer);
+                                
+                                let start = Math.max(o.created, earliestFryer, now);
+                                finishTimeMs = start + tMs;
+                                fryers[fIdx] = finishTimeMs;
+                            } else {
+                                // Tareas manuales: bloquean a 1 empleado Y al equipo específico
+                                let earliestWorker = Math.min(...workers);
+                                let wIdx = workers.indexOf(earliestWorker);
+                                
+                                let equipArr = null;
+                                if (['b3', 'b4'].includes(it.id)) equipArr = blender; // Malteadas, perlas
+                                else if (it.id === 'b5') equipArr = wafflera;
+                                else if (it.id === 'b6') equipArr = crepera;
+                                else if (!['b1', 'b2'].includes(it.id)) equipArr = griddles; // Todo lo demás a la plancha (b1, b2 son cocas y solo ocupan al empleado)
+                                
+                                let earliestEquip = 0;
+                                let eIdx = -1;
+                                if (equipArr) {
+                                    earliestEquip = Math.min(...equipArr);
+                                    eIdx = equipArr.indexOf(earliestEquip);
+                                }
+                                
+                                // El producto arranca cuando hay un empleado libre Y el equipo libre (si aplica)
+                                let start = Math.max(o.created, earliestWorker, earliestEquip, now);
+                                finishTimeMs = start + tMs;
+                                
+                                // Bloqueamos al empleado y a la máquina todo este tiempo
+                                workers[wIdx] = finishTimeMs;
+                                if (equipArr) equipArr[eIdx] = finishTimeMs;
+                            }
                             
                             // El pedido completo está listo cuando sale su último artículo
                             if (finishTimeMs > orderReadyTime) orderReadyTime = finishTimeMs;
